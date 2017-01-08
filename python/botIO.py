@@ -20,7 +20,7 @@ class BotIOSocket(WebSocket):
     # === #
     awaits_img = False
     msg = {}
-    keys = []
+    numkeys = 0
     def control(self, keys):
         self.sendMessage(bson.dumps({"keys": keys}))
 
@@ -55,8 +55,10 @@ class BotIOSocket(WebSocket):
             print("game (re)started")
             self.width = self.msg["width"];
             self.height = self.msg["height"];
+            self.height = self.msg["numkeys"];
             self.control([])
         elif self.msg["state"] == "game_running":
+
             # message consists of two parts (game_info + img)
             if not self.awaits_img:
                 self.awaits_img = True
@@ -68,10 +70,12 @@ class BotIOSocket(WebSocket):
             user_interaction = self.msg["user_interaction"]
             img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
 
-
             # learn ( using the image, the current score and last used keys )
-            # learn(img,score, keys)
-            keys = []
+            # keys = learn(img,score)
+            if score>100:
+                keys = [0.8, 0.2, 0.75]
+            else:
+                keys = [0.8, 0.2, 0.25]
 
             # recalc fps
             self.updateFPS()
@@ -80,7 +84,9 @@ class BotIOSocket(WebSocket):
             # use next keys
             # self.control(keys)
             self.sendMessage(bson.dumps({"keys": keys}))
+
         elif self.msg["state"] == "game_ended":
+
             # score = msg["score"]
             print("game ended")
 

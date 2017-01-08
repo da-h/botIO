@@ -15,13 +15,13 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 	// finally ready (not before, and can cause error, as canvas is not ready yet)
 	ws.onopen = function() {
 		console.log('BotIO: Connected to Controller-Server.');
-		ws.send(BSON.serialize({"state":"game_start", "width":width, "height":height}));
+		ws.send(BSON.serialize({"state":"game_start", "width":width, "height":height, "numkeys":controller.numkeys}));
 	}
 
 	// reconnect (once per second)
 	ws.onclose = function() {
 		console.log('BotIO: Connection Closed!');
-		// setTimeout(createWebSocket, 1*1000, controller, url, canvas, wanted_width, wanted_height);
+		setTimeout(createWebSocket, 1*1000, controller, url, canvas, width, height);
 	}
 
 	ws.onerror = function(error) {
@@ -40,8 +40,9 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 			return;
 		}
 
+		var current_score = controller.getScore();
 
-		// send image on request
+		// send image (on request)
 		outputContext.drawImage(canvas, 0, 0, width, height);
 		var pixelArray = outputContext.getImageData(0,0, width, height).data;
 		var pixellen = pixelArray.length;
@@ -49,16 +50,13 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 		for(var i=0; i<pixellen; i++)
 			byteArray[i] = pixelArray[i];
 
-		// // receive control
-		// var isControl = false;
-		// if( isControl ) {
-		// 	controller({});
-		// }
+		// receive control
+		used_keys = controller.applyKeys(msg.keys)
 		
 		var response = {
 			"state": "game_running",
-			"score": 1234,
-            "user_interaction" : []
+			"score": current_score,
+            "user_interaction" : used_keys
 		};
 
 		ws.send(BSON.serialize(response));

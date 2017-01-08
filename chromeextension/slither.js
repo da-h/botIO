@@ -38,11 +38,6 @@ document.onreadystatechange = function () {
 
 
 
-// ----------------- //
-// Possible Commands //
-// ----------------- //
-// V.possible_keys = [{"name":"degree","range":[0,2*Math.pi]},"space"];
-
 
 
 // ------------------------
@@ -64,13 +59,27 @@ var slither_injection = ""
 	var win2 = createWindow(window_width,window_height);
 
 	// controls
-	var controller = function(o) {
-		console.log(o);
-		var degree = o.degree, 	// [0..2π]
-			speedup= o.speedup; // true/false
-		// setAcceleration(1) // or 0 for off
-		// kd_l = 1; // 0 for off
-		// kd_r = 1; // 0 for off
+	//		(0) left arrow  = kd_l=1  : left turn
+	//		(1) right arrow = kd_r=1  : right turn
+	//		(2) space 		= setAcceleration(1)  : speedup
+	// TODO: user-controls: timeout for userinput
+	var controller = {
+		"numkeys": 3,
+		"applyKeys": function(keys) {
+
+			// left/right turn
+			kd_l = keys[0] >= 0.5 ? 1 : 0;
+			kd_r = keys[1] >= 0.5 ? 1 : 0;
+
+			// speedup
+			setAcceleration( keys[2] >= 0.5 ? 1 : 0 );
+			kd_u = keys[2] >= 0.5 ? 1 : 0;
+		},
+		"getScore" : function() {
+			if(snake == null)
+				return 0;
+			return Math.floor(15 * (fpsls[snake.sct] + snake.fam / fmlts[snake.sct] - 1) - 5) / 1;
+		}
 	}
 
 
@@ -87,7 +96,6 @@ var slither_injection = ""
 
 	// set nickname
 	nick.value = nickname;
-
 
 	// bind new redraw-method to old one
 	window.mc_ = null;
