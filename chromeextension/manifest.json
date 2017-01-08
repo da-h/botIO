@@ -1,0 +1,31 @@
+{
+	"name": "Bot.io - Chrome Extension",
+	"version": "0.0.1",
+	"manifest_version": 2,
+	"description": "Injecting deep-learning into *.io-games.",
+	"homepage_url": "http://slither.io",
+	"web_accessible_resources": [
+		"bson.js",
+		"slither_inject.js",
+		"control_window.html",
+		"slither_game_RE.js",
+		"slither_game_overwrites.js"
+	],
+	"content_scripts": [{
+		"matches": ["http://slither.io/"],
+		"js": ["global.js", "websocket_bridge.js", "slither_game_overwrites.js", "slither.js"],
+		"run_at": "document_end"
+	}],
+	"background": {
+		"scripts": ["reverse_engineering.js"],
+		"persistent": true
+	},
+	"permissions": [
+		"https://*/*",
+		"http://*/*",
+		"webRequest",
+		"webRequestBlocking",
+		"storage"
+	],
+	"options_page": "settings.html"
+}

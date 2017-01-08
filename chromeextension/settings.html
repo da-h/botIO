@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Slitherbot-Options</title>
+		<script src="global.js"></script>
+	</head>
+<body>
+
+	<h2>General</h2>
+	<label> <input type="text" id="nickname" value="please dont kill me"> : nickname </label><br> 
+	<label> <input type="text" id="websocket_url" value="ws://localhost:9999/"> : websocket_url (connection for sending images and receiving controls)</label><br> 
+	<label> <input type="checkbox" id="autostart" checked> : autostart (on page load)</label><br> 
+	<label> <input type="checkbox" id="autorestart" checked> : autorestart (on death)</label><br> 
+	<label> <input type="checkbox" id="redirect_javascript"> : redirect_javascript (only for Reverse Engineering)</label><br> 
+
+	<h2>Learning Window Apearance (Slither)</h2>
+	<label> <input type="text" id="window_width" value="300"> : window_width</label><br> 
+	<label> <input type="text" id="window_height" value="200"> : window_height</label><br> 
+	<label> <input type="checkbox" id="worm_detail"> : worm_detail (segments, shadow, ...)</label><br> 
+	<label> <input type="checkbox" id="worm_round_head"> : worm_round_head (currently only for worm_detail=false)</label><br> 
+	<label> <input type="checkbox" id="worm_blink_on_death"> : worm_blink_on_death (currently only for worm_detail=false)</label><br> 
+	<label> <input type="checkbox" id="worm_speed_stroke_blurred"> : worm_speed_stroke_blurred (currently only for worm_detail=false)</label><br> 
+	<label> <input type="checkbox" id="worm_speed_stroke_fade"> : worm_speed_stroke_fade (currently only for worm_detail=false)</label><br> 
+	<label> <input type="text" id="worm_speed_stroke_width" value="10"> :  worm_speed_stroke_width (currently only for worm_detail=false) <b>std</b> -2 for worm_speed_stroke_blurred=true</label><br> 
+	<label> <input type="checkbox" id="worm_eyes"> : worm_eyes </label><br> 
+	<label> <input type="checkbox" id="worm_antenna"> : worm_antenna </label><br> 
+	<label> <input type="checkbox" id="worm_name"> : worm_name </label><br> 
+	<label> <input type="checkbox" id="game_background"> : game_background </label><br> 
+	<label> <input type="text" id="game_background_color" value="black"> : game_background_color (if game_background==false)</label><br> 
+	<label> <input type="checkbox" id="game_background_move"> : game_background_move (if game_background==true)</label><br> 
+	<label> <input type="checkbox" id="complex_colors"> : complex_colors (unvollständig)</label><br> 
+	<label> <input type="checkbox" id="food_shadow"> : food_shadow (unvollständig)</label><br> 
+
+	<h2>Save The World!</h2>
+	<div id="status"></div>
+	<button id="save">Save</button>
+
+	<script src="settings.js"></script>
+</body>
+</html>
