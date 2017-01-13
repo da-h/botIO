@@ -19,6 +19,9 @@ lsc = PolicyGradient({ 'window_inc': 0, 'window_size': 100})
 
 # run
 frw.run(lsc, arc, {'save_after_cycles':100})
+<<<<<<< Updated upstream
 
 # Test: Hey Chris!
 #test
+=======
+>>>>>>> Stashed changes
