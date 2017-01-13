@@ -1,18 +1,41 @@
 # !/usr/bin/env python3
-
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 import bson, time
 from PIL import Image
+from frameworks import Framework
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
 
-import code
-        # code.interact(local=locals())
-import pdb, traceback, sys;
-        # pdb.set_trace()
+# dev-mode:
+# import code # code.interact(local=locals())
+# import pdb # pdb.set_trace()
 
-class BotIOSocket(WebSocket):
+class SimpleWebSocketServerBindToFramework(SimpleWebSocketServer):
+    def _constructWebSocket(self, sock, adress):
+        print("hi")
+        return self.websocketclass(self, sock, adress)
+    def serveforever(self):
+        print("hi")
+
+
+class BotIOChromeExtension(Framework.Framework, SimpleWebSocketServer):
+
+    def __init__(self, host='', port=9999):
+        SimpleWebSocketServer(
+        self.host = host
+        self.port = port
+        #server = SimpleWebSocketServerBindToFramework(url, port, BotIOChromeExtensionSocket)
+
+    def serveforever(self):
+        print("hey")
+
+# if score>100:
+#     keys = [0.8, 0.2, 0.75]
+# else:
+#     keys = [0.8, 0.2, 0.25]
+
+class BotIOChromeExtensionSocket(WebSocket):
 
 
     # === #
@@ -25,10 +48,10 @@ class BotIOSocket(WebSocket):
         self.sendMessage(bson.dumps({"keys": keys}))
 
     # fps
-    fps = 0;
-    fps_counter = 0;
-    fps_smooth = 0.9;
-    fps_last_timestamp = current_milli_time();
+    fps = 0
+    fps_counter = 0
+    fps_smooth = 0.9
+    fps_last_timestamp = current_milli_time()
     def updateFPS(self):
         self.fps_current_timestamp = current_milli_time()
         if self.fps_current_timestamp - self.fps_last_timestamp > 1000:
@@ -38,8 +61,16 @@ class BotIOSocket(WebSocket):
         self.fps_counter+=1
 
     # image size
-    width = 0;
-    height = 0;
+    width = 0
+    height = 0
+
+
+    # ======================= #
+    # Connection to Framework #
+    # ======================= #
+    framework_wrapper = None
+    def __init__(self, the_framework_wrapper):
+        framework_wrapper = the_framework_wrapper
 
 
     # ==================== #
@@ -53,9 +84,9 @@ class BotIOSocket(WebSocket):
         # answers
         if self.msg["state"] == "game_start":
             print("game (re)started")
-            self.width = self.msg["width"];
-            self.height = self.msg["height"];
-            self.height = self.msg["numkeys"];
+            self.width = self.msg["width"]
+            self.height = self.msg["height"]
+            self.height = self.msg["numkeys"]
             self.control([])
         elif self.msg["state"] == "game_running":
 
@@ -71,11 +102,7 @@ class BotIOSocket(WebSocket):
             img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
 
             # learn ( using the image, the current score and last used keys )
-            # keys = learn(img,score)
-            if score>100:
-                keys = [0.8, 0.2, 0.75]
-            else:
-                keys = [0.8, 0.2, 0.25]
+            keys = framework_wrapper.react(img,interaction,score)
 
             # recalc fps
             self.updateFPS()
@@ -96,5 +123,5 @@ class BotIOSocket(WebSocket):
     def handleClose(self):
         print('Connection closed.')
 
-server = SimpleWebSocketServer('', 9999, BotIOSocket)
-server.serveforever()
+# server = SimpleWebSocketServer('', 9999, BotIOSocket)
+# server.serveforever()

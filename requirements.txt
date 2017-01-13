@@ -1,0 +1,4 @@
+-e git+git://github.com/dpallot/simple-websocket-server.git#egg=simple-websocket-server
+bson
+numpy
+pillow
