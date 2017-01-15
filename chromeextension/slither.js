@@ -8,6 +8,7 @@ for(var i in all_vars)
 
 
 // Read settings
+// TODO: read settings from python (overwrites this settings)
 chrome.storage.sync.get(all_vars, function(localVars) {
 	for(i in localVars) V[i] = localVars[i];
 
@@ -74,6 +75,8 @@ var slither_injection = ""
 			// speedup
 			setAcceleration( keys[2] >= 0.5 ? 1 : 0 );
 			kd_u = keys[2] >= 0.5 ? 1 : 0;
+
+			return keys;
 		},
 		"getScore" : function() {
 			if(snake == null)

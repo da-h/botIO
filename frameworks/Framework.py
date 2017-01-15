@@ -1,11 +1,10 @@
 
 class Framework(object):
 
-    def __init__(self):
-        pass
+    def react(self, image, lastreaction, score):
+        return self.learningscheme.predict(image, lastreaction, score)
 
-    def react(image, lastreaction, score):
-        pass
-
-    def set(self, learningscheme, architecture):
-        pass
+    def run(self, learningscheme, architecture, save_after_cycles=None):
+        self.learningscheme = learningscheme
+        self.learningscheme.architecture = architecture
+        self.save_after_cycles = save_after_cycles

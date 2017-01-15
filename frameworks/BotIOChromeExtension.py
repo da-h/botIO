@@ -2,38 +2,34 @@
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 import bson, time
 from PIL import Image
-from frameworks import Framework
+from . import Framework
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
-
-# dev-mode:
-# import code # code.interact(local=locals())
-# import pdb # pdb.set_trace()
-
-class SimpleWebSocketServerBindToFramework(SimpleWebSocketServer):
-    def _constructWebSocket(self, sock, adress):
-        print("hi")
-        return self.websocketclass(self, sock, adress)
-    def serveforever(self):
-        print("hi")
 
 
 class BotIOChromeExtension(Framework.Framework, SimpleWebSocketServer):
 
     def __init__(self, host='', port=9999):
-        SimpleWebSocketServer(
         self.host = host
         self.port = port
-        #server = SimpleWebSocketServerBindToFramework(url, port, BotIOChromeExtensionSocket)
+        SimpleWebSocketServer.__init__(self, host, port, BotIOChromeExtensionSocket, selectInterval=0.1)
+
+    def _constructWebSocket(self, sock, address):
+        ws = self.websocketclass(self, sock, address)
+        ws.framework_wrapper = self
+        return ws
 
     def serveforever(self):
-        print("hey")
+        print("Listening forever... <3 ")
+        super(BotIOChromeExtension, self).serveforever()
 
-# if score>100:
-#     keys = [0.8, 0.2, 0.75]
-# else:
-#     keys = [0.8, 0.2, 0.25]
+    def run(self, learningscheme, architecture, save_after_cycles):
+        super().__init__(learningscheme, architecture, save_after_cycles)
+        server = BotIOChromeExtension(self.host, self.port)
+        server.serveforever()
+
+
 
 class BotIOChromeExtensionSocket(WebSocket):
 
@@ -68,9 +64,8 @@ class BotIOChromeExtensionSocket(WebSocket):
     # ======================= #
     # Connection to Framework #
     # ======================= #
-    framework_wrapper = None
-    def __init__(self, the_framework_wrapper):
-        framework_wrapper = the_framework_wrapper
+    def __init__(self, server, sock, address):
+        super(self.__class__,self).__init__(server, sock, address)
 
 
     # ==================== #
@@ -98,19 +93,18 @@ class BotIOChromeExtensionSocket(WebSocket):
 
             # get data
             score = self.msg["score"]
-            user_interaction = self.msg["user_interaction"]
+            interaction = self.msg["interaction"]
             img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
 
             # learn ( using the image, the current score and last used keys )
-            keys = framework_wrapper.react(img,interaction,score)
+            keys = self.framework_wrapper.react(img,interaction,score)
 
             # recalc fps
             self.updateFPS()
-            print("FPS:",self.fps, " Score:",score)
+            print("\rFPS:",self.fps, " Score:",score, end="")
 
             # use next keys
-            # self.control(keys)
-            self.sendMessage(bson.dumps({"keys": keys}))
+            self.control(keys)
 
         elif self.msg["state"] == "game_ended":
 
@@ -123,5 +117,4 @@ class BotIOChromeExtensionSocket(WebSocket):
     def handleClose(self):
         print('Connection closed.')
 
-# server = SimpleWebSocketServer('', 9999, BotIOSocket)
-# server.serveforever()
+

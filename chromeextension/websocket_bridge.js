@@ -56,7 +56,7 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 		var response = {
 			"state": "game_running",
 			"score": current_score,
-            "user_interaction" : used_keys
+            "interaction" : used_keys
 		};
 
 		ws.send(BSON.serialize(response));
