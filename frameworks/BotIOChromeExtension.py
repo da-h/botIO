@@ -10,10 +10,12 @@ current_milli_time = lambda: int(round(time.time() * 1000))
 
 class BotIOChromeExtension(Framework.Framework, SimpleWebSocketServer):
 
-    def __init__(self, host='', port=9999):
+    def __init__(self, host='', port=9999, **kwargs):
         self.host = host
         self.port = port
         SimpleWebSocketServer.__init__(self, host, port, BotIOChromeExtensionSocket, selectInterval=0.1)
+        Framework.Framework.__init__(self, **kwargs)
+        self.serveforever()
 
     def _constructWebSocket(self, sock, address):
         ws = self.websocketclass(self, sock, address)
@@ -23,11 +25,6 @@ class BotIOChromeExtension(Framework.Framework, SimpleWebSocketServer):
     def serveforever(self):
         print("Listening forever... <3 ")
         super(BotIOChromeExtension, self).serveforever()
-
-    def run(self, learningscheme, architecture, save_after_cycles):
-        super().__init__(learningscheme, architecture, save_after_cycles)
-        server = BotIOChromeExtension(self.host, self.port)
-        server.serveforever()
 
 
 
@@ -79,9 +76,18 @@ class BotIOChromeExtensionSocket(WebSocket):
         # answers
         if self.msg["state"] == "game_start":
             print("game (re)started")
-            self.width = self.msg["width"]
-            self.height = self.msg["height"]
-            self.height = self.msg["numkeys"]
+            if self.framework_wrapper.game_running:
+
+                # init game
+                self.width = self.msg["width"]
+                self.height = self.msg["height"]
+                self.numkeys = self.msg["numkeys"]
+
+                # let framework initialize learningscheme and architecture
+                self.framework_wrapper.game_initialized((self.width, self.height), self.numkeys)
+
+            # ask for next image
+            self.framework_wrapper.game_restarted()
             self.control([])
         elif self.msg["state"] == "game_running":
 

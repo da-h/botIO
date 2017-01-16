@@ -5,8 +5,7 @@ class NNArchitecture(object):
         pass
 
 
-# https://www.tensorflow.org/get_started/
-class OneLayer(NNArchitecture):
+class TwoLayer(NNArchitecture):
 
     def create(self, input_size, output_size):
         pass
