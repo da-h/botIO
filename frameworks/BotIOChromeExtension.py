@@ -76,7 +76,7 @@ class BotIOChromeExtensionSocket(WebSocket):
         # answers
         if self.msg["state"] == "game_start":
             print("game (re)started")
-            if self.framework_wrapper.game_running:
+            if not self.framework_wrapper.game_running:
 
                 # init game
                 self.width = self.msg["width"]

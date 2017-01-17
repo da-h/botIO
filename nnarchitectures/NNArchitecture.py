@@ -1,11 +1,16 @@
 
 class NNArchitecture(object):
 
-    def create(self, input_size, output_size):
-        pass
+    def __init__(self, input_size, output_size, optimizer):
+        self.optimizer = optimizer
+        self.input_size = input_size
+        self.output_size = output_size
 
+    def getInputPlaceholder(self, num=1):
+        raise Exception("Should be overwritten")
 
-class TwoLayer(NNArchitecture):
+    def getOutputPlaceholder(self, num=1):
+        raise Exception("Should be overwritten")
 
-    def create(self, input_size, output_size):
-        pass
+    def createCalculation(self, input_data):
+        raise Exception("Should be overwritten")
