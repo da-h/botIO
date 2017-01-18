@@ -10,7 +10,7 @@ class LearningScheme(object):
         self.arch_x_ = self.architecture.getInputPlaceholder()
         self.arch_y_ = self.architecture.getOutputPlaceholder()
 
-    def __init__finished(self):
+    def _init__finished(self):
 
         # build computation graph
         self.init_op = tf.global_variables_initializer()
@@ -22,11 +22,11 @@ class LearningScheme(object):
 
     def constructNN(self, architecture_tuple):
         # build architecture
-        architecture_tuple[1]["input_dim"] = self.image_dim
+        architecture_tuple[1]["input_size"] = self.image_dim
         architecture_tuple[1]["output_size"] = self.numkeys
         self.architecture = architecture_tuple[0](**architecture_tuple[1])
 
-    def game_restarted():
+    def game_restarted(self):
         raise Exception("Should be overwritten")
 
     def learn(self):

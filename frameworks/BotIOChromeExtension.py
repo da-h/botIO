@@ -3,6 +3,8 @@ from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 import bson, time
 from PIL import Image
 from . import Framework
+import sys
+import numpy as np
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -45,13 +47,15 @@ class BotIOChromeExtensionSocket(WebSocket):
     fps_counter = 0
     fps_smooth = 0.9
     fps_last_timestamp = current_milli_time()
+    num_frames = 0
     def updateFPS(self):
         self.fps_current_timestamp = current_milli_time()
         if self.fps_current_timestamp - self.fps_last_timestamp > 1000:
             self.fps_last_timestamp = self.fps_current_timestamp
             self.fps = self.fps_counter
             self.fps_counter=0
-        self.fps_counter+=1
+        self.fps_counter +=1
+        self.num_frames +=1
 
     # image size
     width = 0
@@ -63,6 +67,7 @@ class BotIOChromeExtensionSocket(WebSocket):
     # ======================= #
     def __init__(self, server, sock, address):
         super(self.__class__,self).__init__(server, sock, address)
+        self.lastscore = 0
 
 
     # ==================== #
@@ -76,6 +81,9 @@ class BotIOChromeExtensionSocket(WebSocket):
         # answers
         if self.msg["state"] == "game_start":
             print("game (re)started")
+
+            # TODO: not good, if error in python occurs
+            # (wont re-init a new framework_wrapper)
             if not self.framework_wrapper.game_running:
 
                 # init game
@@ -102,12 +110,17 @@ class BotIOChromeExtensionSocket(WebSocket):
             interaction = self.msg["interaction"]
             img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
 
+            # make grayscale
+            img = np.asarray(img)
+            img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
+
             # learn ( using the image, the current score and last used keys )
             keys = self.framework_wrapper.react(img,interaction,score)
 
             # recalc fps
             self.updateFPS()
-            print("\rFPS:",self.fps, " Score:",score, end="")
+            print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Num Frames:",self.num_frames, " keys:",keys, end="")
+            self.lastscore = score
 
             # use next keys
             self.control(keys)
@@ -122,5 +135,6 @@ class BotIOChromeExtensionSocket(WebSocket):
 
     def handleClose(self):
         print('Connection closed.')
+        sys.exit(0)
 
 
