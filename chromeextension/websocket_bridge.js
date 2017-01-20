@@ -1,9 +1,13 @@
 
+// sleep function
+V.sleep = function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
 V.createWebSocket = function(controller, url, canvas, width, height) {
 	var BSON = bson().BSON;
 	var ws = new WebSocket(url);
 	ws.binaryType = "arraybuffer"; // alternative: "blob"
 	var context = canvas.getContext("2d");
+
 	
 	// scaled canvas
 	var outputCanvas = document.createElement("canvas");
@@ -29,7 +33,7 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 		console.log(error);
 	}
 
-	ws.onmessage = function(e) {
+	ws.onmessage = async function(e) {
 		var msg;
 		try {
 			uint8Array  = new Uint8Array(e.data);
@@ -39,6 +43,10 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 			console.log('Failed to deserialize: ', err);
 			return;
 		}
+
+		while(!controller.playing())
+			await sleep(50);
+			
 
 		// apply control for last image
 		used_keys = controller.applyKeys(msg.keys)

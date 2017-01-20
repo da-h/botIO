@@ -12,7 +12,7 @@ import tensorflow as tf
 # create environment
 # framework: serves picture, applies commands
 # alternatives: UniverseFW, BotIOChromeExtension
-frw = (BotIOChromeExtension,{'host':'','port':9999})
+frw = (BotIOChromeExtension,{'host':'','port':9999, 'skipframes': 10})
 
 # architecture of neural network
 # alternatives: CNN, RNN, FC, [LSTM, FractalNet, HighwayNets, uNet, ...]
@@ -21,7 +21,7 @@ arc = (FC, {"layers":8, "filters":32*32, "optimizer":tf.train.AdamOptimizer(0.00
 
 # learning scheme: gets pictures from framework, uses network
 # alternatives: PolicyGradient, QLearning,
-lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":5})
+lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":25})
 
 # run
 Framework.Framework.run(frw, lsc, arc, save_after_cycles=100)

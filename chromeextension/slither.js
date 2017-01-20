@@ -97,6 +97,9 @@ var slither_injection = ""
 			if(snake == null)
 				return 0;
 			return Math.floor(15 * (fpsls[snake.sct] + snake.fam / fmlts[snake.sct] - 1) - 5) / 1;
+		},
+		"playing" : function() {
+			return snake && (!"dead" in snake || !snake.dead);
 		}
 	}
 
@@ -110,7 +113,6 @@ var slither_injection = ""
 		var e = b.keyCode;
 		if(e == 113) {
 			controller.userinput = !controller.userinput;
-			console.log("userinput:",controller.userinput);
 
 			// reset keys
 			if(controller.userinput) {

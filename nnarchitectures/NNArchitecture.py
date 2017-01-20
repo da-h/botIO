@@ -8,10 +8,10 @@ class NNArchitecture(object):
         self.output_size = output_size
 
     def getInputPlaceholder(self, num=1):
-        return tf.placeholder(tf.float32, shape=[num, self.input_size[0]*self.input_size[1]])
+        return tf.placeholder(tf.float32, shape=[num] + self.input_size)
 
     def getOutputPlaceholder(self, num=1):
-        return tf.placeholder(tf.float32, shape=(self.output_size))
+        return tf.placeholder(tf.float32, shape=[num] + self.output_size)
 
     def createCalculation(self, input_data):
         raise Exception("Should be overwritten")

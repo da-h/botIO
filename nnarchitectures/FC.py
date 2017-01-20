@@ -21,8 +21,8 @@ class FC(NNArchitecture.NNArchitecture):
         for i in range(1, self.layers):
             self.weight_vars["W_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters,self.filters],stddev=self.stddev(self.filters)))
             self.bias_vars["b_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters], stddev=self.stddev(self.filters)))
-        self.weight_vars["W_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.filters, self.output_size],stddev=self.stddev(self.filters)))
-        self.bias_vars["b_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.output_size], stddev=self.stddev(self.filters)))
+        self.weight_vars["W_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.filters] + self.output_size,stddev=self.stddev(self.filters)))
+        self.bias_vars["b_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal(self.output_size, stddev=self.stddev(self.filters)))
 
     def createCalculation(self, input_data):
 
