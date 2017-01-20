@@ -17,11 +17,12 @@ frw = (BotIOChromeExtension,{'host':'','port':9999})
 # architecture of neural network
 # alternatives: CNN, RNN, FC, [LSTM, FractalNet, HighwayNets, uNet, ...]
 # arc = (CNN_128x128_3x3_FC2, {"output_size":3, "stride":1, "fc_size":300, "num_filters":20, "optimizer":tf.train.GradientDescentOptimizer(0.5)})
-arc = (FC, {"layers":10, "filters":32*32, "optimizer":tf.train.AdamOptimizer(0.0001)})
+arc = (FC, {"layers":8, "filters":32*32, "optimizer":tf.train.AdamOptimizer(0.0000001)})
 
 # learning scheme: gets pictures from framework, uses network
 # alternatives: PolicyGradient, QLearning,
 lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":25})
+# todo skip frames
 
 # run
 Framework.Framework.run(frw, lsc, arc, save_after_cycles=100)

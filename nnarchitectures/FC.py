@@ -13,17 +13,16 @@ class FC(NNArchitecture.NNArchitecture):
         self.layers = layers
 
         # create needed variables
-        stddev = math.sqrt(2*1.3/(self.input_size[0]*self.input_size[1]))
         self.weight_vars = {}
         self.bias_vars = {}
         weight_dim = [self.input_size[0]*self.input_size[1], self.filters]
-        self.weight_vars["W_fc0"] = tf.Variable(tf.truncated_normal(weight_dim,stddev=stddev))
-        self.bias_vars["b_fc0"] = tf.Variable(tf.truncated_normal([self.filters], stddev=stddev))
+        self.weight_vars["W_fc0"] = tf.Variable(tf.truncated_normal(weight_dim,stddev=self.stddev(self.input_size[0]*self.input_size[1])))
+        self.bias_vars["b_fc0"] = tf.Variable(tf.truncated_normal([self.filters], stddev=self.stddev(self.input_size[0]*self.input_size[1])))
         for i in range(1, self.layers):
-            self.weight_vars["W_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters,self.filters],stddev=stddev))
-            self.bias_vars["b_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters], stddev=stddev))
-        self.weight_vars["W_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.filters, self.output_size],stddev=stddev))
-        self.bias_vars["b_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.output_size], stddev=stddev))
+            self.weight_vars["W_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters,self.filters],stddev=self.stddev(self.filters)))
+            self.bias_vars["b_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters], stddev=self.stddev(self.filters)))
+        self.weight_vars["W_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.filters, self.output_size],stddev=self.stddev(self.filters)))
+        self.bias_vars["b_fc"+str(self.layers)] = tf.Variable(tf.truncated_normal([self.output_size], stddev=self.stddev(self.filters)))
 
     def createCalculation(self, input_data):
 
@@ -37,3 +36,7 @@ class FC(NNArchitecture.NNArchitecture):
 
         # return construction["y_"+str(self.layers)]
         return tf.sigmoid(construction["y_"+str(self.layers)])
+
+    def stddev(self, input_size):
+        # return math.sqrt(2*1.3/input_size)
+        return math.sqrt(4*1.3/input_size)

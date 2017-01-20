@@ -65,16 +65,16 @@ var slither_injection = ""
 	//		(2) space 		= setAcceleration(1)  : speedup
 	// TODO: user-controls: timeout for userinput
 	var controller = {
-		"numkeys": 3,
+		"numkeys": 2,
 		"applyKeys": function(keys) {
 
 			// left/right turn
-			kd_l = keys[0] >= 0.5 ? 1 : 0;
-			kd_r = keys[1] >= 0.5 ? 1 : 0;
+			kd_l = keys[0] >= 2/3 ? 1 : 0;
+			kd_r = keys[0] < 1/3 ? 1 : 0;
 
 			// speedup
-			setAcceleration( keys[2] >= 0.5 ? 1 : 0 );
-			kd_u = keys[2] >= 0.5 ? 1 : 0;
+			setAcceleration( keys[1] >= 0.5 ? 1 : 0 );
+			kd_u = keys[1] >= 0.5 ? 1 : 0;
 
 			return keys;
 		},
