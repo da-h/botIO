@@ -1,8 +1,8 @@
 
 class Framework(object):
 
-    def react(self, image, lastreaction, score):
-        return self.learningscheme.react(image, score)
+    def react(self, used_keys, image, score, userinput=False):
+        return self.learningscheme.react(used_keys, image, score, userinput)
 
     def __init__(self, learningscheme_tuple, save_after_cycles=None):
         self.learningscheme_tuple = learningscheme_tuple
@@ -13,6 +13,7 @@ class Framework(object):
         self.game_running = True
         self.learningscheme_tuple[1]["image_dim"] = image_dim
         self.learningscheme_tuple[1]["numkeys"] = numkeys
+        self.learningscheme_tuple[1]["save_after_cycles"] = self.save_after_cycles
         self.learningscheme = self.learningscheme_tuple[0](**self.learningscheme_tuple[1])
 
     def game_restarted(self):

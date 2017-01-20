@@ -2,9 +2,10 @@ import tensorflow as tf
 
 class LearningScheme(object):
 
-    def __init__(self, image_dim, numkeys, architecture_tuple):
+    def __init__(self, image_dim, numkeys, architecture_tuple, save_after_cycles):
         self.image_dim = image_dim
         self.numkeys = numkeys
+        self.save_after_cycles = save_after_cycles
 
         self.constructNN(architecture_tuple)
         self.arch_x_ = self.architecture.getInputPlaceholder()
@@ -29,8 +30,5 @@ class LearningScheme(object):
     def game_restarted(self):
         raise Exception("Should be overwritten")
 
-    def learn(self):
-        raise Exception("Should be overwritten")
-
-    def react(self, image, score):
+    def react(self, used_keys, image, score, userinput=False):
         raise Exception("Should be overwritten")

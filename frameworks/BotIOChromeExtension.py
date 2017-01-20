@@ -107,7 +107,8 @@ class BotIOChromeExtensionSocket(WebSocket):
 
             # get data
             score = self.msg["score"]
-            interaction = self.msg["interaction"]
+            used_keys = self.msg["used_keys"]
+            userinput = self.msg["userinput"]
             img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
 
             # make grayscale
@@ -115,11 +116,11 @@ class BotIOChromeExtensionSocket(WebSocket):
             img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
 
             # learn ( using the image, the current score and last used keys )
-            keys = self.framework_wrapper.react(img,interaction,score)
+            keys = self.framework_wrapper.react(used_keys, img, score, userinput)
 
             # recalc fps
             self.updateFPS()
-            print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Num Frames:",self.num_frames, " keys:",keys, end="")
+            print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Num Frames:",self.num_frames, " keys:",keys, " user:", userinput, end="")
             self.lastscore = score
 
             # use next keys
@@ -135,6 +136,3 @@ class BotIOChromeExtensionSocket(WebSocket):
 
     def handleClose(self):
         print('Connection closed.')
-        sys.exit(0)
-
-

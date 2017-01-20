@@ -63,18 +63,33 @@ var slither_injection = ""
 	//		(0) left arrow  = kd_l=1  : left turn
 	//		(1) right arrow = kd_r=1  : right turn
 	//		(2) space 		= setAcceleration(1)  : speedup
-	// TODO: user-controls: timeout for userinput
 	var controller = {
+		"userinput" : false,
 		"numkeys": 2,
 		"applyKeys": function(keys) {
 
-			// left/right turn
-			kd_l = keys[0] >= 2/3 ? 1 : 0;
-			kd_r = keys[0] < 1/3 ? 1 : 0;
+			// standard keypress
+			if(keys.length != controller.numkeys)
+				return [0.5, 0];
 
-			// speedup
-			setAcceleration( keys[1] >= 0.5 ? 1 : 0 );
-			kd_u = keys[1] >= 0.5 ? 1 : 0;
+			// no userinput
+			if(!controller.userinput) {
+			
+				// left/right turn
+				kd_l = keys[0] < 1/3 ? 1 : 0;
+				kd_r = keys[0] >= 2/3 ? 1 : 0;
+
+				// speedup
+				setAcceleration( keys[1] >= 0.5 ? 1 : 0 );
+				kd_u = keys[1] >= 0.5 ? 1 : 0;
+
+			}
+
+			// return real pressed key-array:
+			// 	left/right turn
+				keys[0] = kd_l==1 ? 0 : kd_r==1 ? 1 : 0.5;
+			// 	speedup
+				keys[1] = kd_u==1 ? 1 : 0;
 
 			return keys;
 		},
@@ -84,6 +99,31 @@ var slither_injection = ""
 			return Math.floor(15 * (fpsls[snake.sct] + snake.fam / fmlts[snake.sct] - 1) - 5) / 1;
 		}
 	}
+
+	// disable mouse-input
+	// TODO
+
+	// cope with user-controls
+	var onkeydown_old = document.onkeydown;
+	document.onkeydown = function(b0) {
+		b = b0 || window.event;
+		var e = b.keyCode;
+		if(e == 113) {
+			controller.userinput = !controller.userinput;
+			console.log("userinput:",controller.userinput);
+
+			// reset keys
+			if(controller.userinput) {
+				kd_l = 0;
+				kd_r = 0;
+				kd_u = 0;
+			}
+		}
+		
+		// let user do his commands
+		if(controller.userinput)
+			onkeydown_old(b0);
+	};
 
 
 	// ------------ //

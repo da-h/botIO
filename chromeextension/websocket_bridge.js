@@ -40,6 +40,10 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 			return;
 		}
 
+		// apply control for last image
+		used_keys = controller.applyKeys(msg.keys)
+		
+		// receive current score
 		var current_score = controller.getScore();
 
 		// send image (on request)
@@ -50,13 +54,11 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 		for(var i=0; i<pixellen; i++)
 			byteArray[i] = pixelArray[i];
 
-		// receive control
-		used_keys = controller.applyKeys(msg.keys)
-		
 		var response = {
 			"state": "game_running",
 			"score": current_score,
-            "interaction" : used_keys
+            "used_keys" : used_keys,
+            "userinput" : controller.userinput
 		};
 
 		ws.send(BSON.serialize(response));

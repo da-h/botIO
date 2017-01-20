@@ -21,8 +21,7 @@ arc = (FC, {"layers":8, "filters":32*32, "optimizer":tf.train.AdamOptimizer(0.00
 
 # learning scheme: gets pictures from framework, uses network
 # alternatives: PolicyGradient, QLearning,
-lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":25})
-# todo skip frames
+lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":5})
 
 # run
 Framework.Framework.run(frw, lsc, arc, save_after_cycles=100)
