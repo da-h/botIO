@@ -7,8 +7,9 @@ class LearningScheme(object):
         self.image_dim = image_dim
         self.numkeys = numkeys
         self.save_after_cycles = save_after_cycles
-        self.restore_path = restore_path
+        self.restore_path = restore_path+"/"
         self.save_counter = 0
+        self.save_checkpoints = 0
 
         self.constructNN(architecture_tuple)
         self.arch_x_ = self.architecture.getInputPlaceholder()
@@ -25,6 +26,8 @@ class LearningScheme(object):
 
         # restore if exists
         self.saver = tf.train.Saver()
+        if not os.path.exists(self.restore_path):
+            os.makedirs(self.restore_path)
         ckpt = tf.train.get_checkpoint_state(self.restore_path)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restoring ... ", end="");
@@ -44,7 +47,7 @@ class LearningScheme(object):
         raise Exception("Should be overwritten")
 
     def save(self):
-        pass
-        # self.save_counter += 1
-        # if self.save_counter % self.save_after_cycles == 0:
-        #     self.saver.save(self.sess, self.restore_path)
+        self.save_counter += 1
+        if self.save_counter % self.save_after_cycles == 0:
+            self.save_checkpoints += 1
+            self.saver.save(self.sess, self.restore_path, global_step=self.save_checkpoints)
