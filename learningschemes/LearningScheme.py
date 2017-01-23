@@ -3,9 +3,10 @@ import os
 
 class LearningScheme(object):
 
-    def __init__(self, image_dim, numkeys, architecture_tuple, save_after_cycles, restore_path):
+    def __init__(self, image_dim, numkeys, architecture_tuple, save_after_cycles, restore_path, optimizer=tf.train.AdamOptimizer(0.001)):
         self.image_dim = image_dim
         self.numkeys = numkeys
+        self.optimizer = optimizer
         self.save_after_cycles = save_after_cycles
         self.restore_path = restore_path+"/"
         self.save_counter = 0
