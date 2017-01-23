@@ -23,7 +23,7 @@ class CNN(NNArchitecture.NNArchitecture):
         size = 128
         stddev = self.stddev(128**2, 64**2)
         self.weight_vars["W_conv_1"] =  tf.Variable(tf.truncated_normal([3,3,self.channels,filters],stddev=stddev))
-        self.bias_vars["b_1"] = tf.Variable(tf.truncated_normal([filters],stddev=stddev))
+        self.bias_vars["b_1"] = tf.Variable(tf.zeros([filters]))
         size /= 2
 
 
@@ -31,7 +31,7 @@ class CNN(NNArchitecture.NNArchitecture):
             stddev = self.stddev((filters*2**(i-2))*size**2, filters*2**(i-1)*(size/2)**2)
             size /= 2
             self.weight_vars["W_conv_"+str(i)] =  tf.Variable(tf.truncated_normal([3,3,filters*2**(i-2),filters*2**(i-1)],stddev=stddev))
-            self.bias_vars["b_"+str(i)] = tf.Variable(tf.truncated_normal([filters*2**(i-1)],stddev=stddev))
+            self.bias_vars["b_"+str(i)] = tf.Variable(tf.zeros([filters*2**(i-1)]))
 
 
 
@@ -60,5 +60,6 @@ class CNN(NNArchitecture.NNArchitecture):
         return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
     def stddev(self, input_size, output_size):
-        return 2*math.sqrt(1.3/(input_size+output_size))
+        # return math.sqrt(4*1.3/(input_size+output_size))
+        return math.sqrt(100/(input_size))
         # return 4*math.sqrt(6/(input_size+output_size))
