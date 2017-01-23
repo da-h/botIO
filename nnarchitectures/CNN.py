@@ -3,77 +3,59 @@ import numpy as np
 from . import NNArchitecture
 
 # https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/3_NeuralNetworks/convolutional_network.py
+
 class CNN_128x128_3x3_FC2(NNArchitecture.NNArchitecture):
 
-    def __init__(self, input_size, output_size, stride=0, fc_size=300, num_filters=20, optimizer=None):
-        super().__init__(input_size, output_size, optimizer)
+    def __init__(self, num_filters=20, **kwargs):
+        super().__init__(**kwargs)
 
-        if input_size[0] != 128 or input_size[1] != 128:
+        if input_size[0] != 128 or input_size[1] != 128: # fixed 128x128 input size
             raise ValueError("wrong dimension given for this Network")
 
-        self.stride = stride
         self.num_filters = num_filters
         self.fc_size = fc_size
-        # TODO: needed???
         CNN = self.__class__
 
-        # create needed variables
-        # self.W_conv1 = CNN.weight_variable([3,3,1,self.num_filters])
-        # self.b_conv1 = CNN.bias_variable([self.num_filters])
-        # self.W_conv2 = CNN.weight_variable([3,3,1,self.num_filters])
-        # self.b_conv2 = CNN.bias_variable([self.num_filters])
-        # self.W_conv3 = CNN.weight_variable([3,3,1,self.num_filters])
-        # self.b_conv3 = CNN.bias_variable([self.num_filters])
-        self.W_fc1 = CNN.weight_variable([128*128,self.fc_size])
-        # self.W_fc1 = CNN.weight_variable([16*16*self.num_filters,self.fc_size])
-        self.b_fc1 = CNN.bias_variable([self.fc_size])
-        self.W_fc2 = CNN.weight_variable([self.fc_size,self.output_size])
-        self.b_fc2 = CNN.bias_variable([self.output_size])
+	self.weight_vars = {}
+        self.bias_vars = {}
+
+	channels = input_size[0]
+	
+	self.weight_vars["W_conv_1"] =  tf.Variable(tf.truncated_normal([3,3,channels,num_filters],stddev=self.stddev(128*128))
+	self.bias_vars["b_1"] = tf.Variable(tf.truncated_normal(num_filters,stddev=self.stddev(128*128))
+
+
+	for i in range(2,6):
+		self.weight_vars["W_conv_"+str(i)] =  tf.Variable(tf.truncated_normal([3,3,num_filters*2**(i-2),num_filters*2**(i-1)],stddev=self.stddev(128*128))
+		self.bias_vars["b_"+str(i)] = tf.Variable(tf.truncated_normal(num_filters,stddev=self.stddev(128*128))
+
+      
 
     def createCalculation(self, input_data):
         CNN = self.__class__
+        #input dimension : 128*128*channels
+	x = tf.reshape(x, [-1,128,128,channels])
 
-        #Dimension : 128*128*1
-        x_ = tf.reshape(input_data, [-1, 128,128,1])
+	layers = {}
 
-        #conv+relu+pool0. Dimension after : 64x64x1
-        # h_conv1 = tf.nn.relu(CNN.conv2d(x_, self.W_conv1, self.stride) + self.b_conv1)
-        # h_pool1 = CNN.max_pool_2x2(h_conv1)
+	layers["conv_relu_1"] = tf.nn.relu(CNN.conv2d(x, self.weight_vars["W_conv_1"]) + self.bias_vars["b_1"])
+	layers["maxpool_1"] = CNN.max_pool_2x2(layers["conv_relu_1"])
 
-        #conv+relu+pool1. Dimension after : 32x32x1
-        # h_conv2 = tf.nn.relu(CNN.conv2d(h_pool1, self.W_conv2, self.stride) + self.b_conv2)
-        # h_pool2 = CNN.max_pool_2x2(h_conv2)
+	for i in range(1,5):
+		layers["conv_relu_"+str(i+1)] = tf.nn.relu(CNN.conv2d(x, self.weight_vars["W_conv"+str(i)]) + self.bias_vars["b_"+str(i+1)])
+		layers["maxpool_"+str(i+1)] = CNN.max_pool_2x2(layers["conv_relu_1"])
+	
+	#output dimension 4*4*num_filters*16
 
-        # #conv+relu+pool1. Dimension after : 16x16x1
-        # h_conv3 = tf.nn.relu(CNN.conv2d(h_pool2, self.W_conv3, self.stride) + self.b_conv3)
-        # h_pool3 = CNN.max_pool_2x2(h_conv3)
+        return layers["maxpool_5"]
 
-        # test
-        h_pool3_flat = tf.reshape(x_, [-1, 128*128])
-
-        # fully connected 1
-        # h_pool3_flat = tf.reshape(h_pool3, [-1, 16*16*self.num_filters])
-        h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, self.W_fc1) + self.b_fc1)
-
-        #dropout??
-        #keep_prob = tf.placeholder(tf.float32)
-        #h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-
-        # fully connected 2
-
-        # output
-        return tf.matmul(h_fc1, self.W_fc2) + self.b_fc2
-
-    def weight_variable(shape):
-        initial = tf.truncated_normal(shape, stddev=0.1)
-        return tf.Variable(initial)
-
-    def bias_variable(shape):
-        initial = tf.constant(0.1, shape=shape)
-        return tf.Variable(initial)
-
-    def conv2d(x, W, stride):
-        return tf.nn.conv2d(x, W, strides=[1, stride, stride, 1], padding='SAME') #zero padding so input dim = output dim
+    
+    def conv2d(x, W):
+        return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME') #zero padding so input dim = output dim
 
     def max_pool_2x2(x): #regular maxpooling in 2x2 blocks
         return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+
+    def stddev(self, input_size):
+        # return math.sqrt(2*1.3/input_size)
+        return math.sqrt(4*1.3/input_size)
