@@ -1,11 +1,14 @@
 import tensorflow as tf
+import os
 
 class LearningScheme(object):
 
-    def __init__(self, image_dim, numkeys, architecture_tuple, save_after_cycles):
+    def __init__(self, image_dim, numkeys, architecture_tuple, save_after_cycles, restore_path):
         self.image_dim = image_dim
         self.numkeys = numkeys
         self.save_after_cycles = save_after_cycles
+        self.restore_path = restore_path
+        self.save_counter = 0
 
         self.constructNN(architecture_tuple)
         self.arch_x_ = self.architecture.getInputPlaceholder()
@@ -15,11 +18,18 @@ class LearningScheme(object):
 
         # build computation graph
         self.init_op = tf.global_variables_initializer()
-        self.saver = tf.train.Saver()
 
         # start tensorflow session
         self.sess = tf.Session()
         self.sess.run(self.init_op)
+
+        # restore if exists
+        self.saver = tf.train.Saver()
+        ckpt = tf.train.get_checkpoint_state(self.restore_path)
+        if ckpt and ckpt.model_checkpoint_path:
+            print("Restoring ... ", end="");
+            self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+            print("Done.\n");
 
     def constructNN(self, architecture_tuple):
         # build architecture
@@ -32,3 +42,9 @@ class LearningScheme(object):
 
     def react(self, used_keys, image, score, userinput=False):
         raise Exception("Should be overwritten")
+
+    def save(self):
+        pass
+        # self.save_counter += 1
+        # if self.save_counter % self.save_after_cycles == 0:
+        #     self.saver.save(self.sess, self.restore_path)

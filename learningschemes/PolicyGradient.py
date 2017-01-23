@@ -49,6 +49,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
         if userinput:
             self.sess.run(self.update_usr, feed_dict={self.input: image, self.output_keys: used_keys})
             self._reset_pg()
+            self.save()
             return used_keys # in case user is not giving input by the time of sending this message
 
         self.framecount += 1
@@ -64,6 +65,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
             self.learncount += 1
             self._reset_pg()
             self.lastscore = absolute_score
+            self.save()
 
         return current_command.tolist()
 
