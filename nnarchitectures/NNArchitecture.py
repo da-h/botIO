@@ -16,3 +16,6 @@ class NNArchitecture(object):
     def createCalculation(self, input_data):
         raise Exception("Should be overwritten")
 
+class NNMerge(object):
+    def __init__(self, settings):
+

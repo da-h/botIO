@@ -66,6 +66,7 @@ var slither_injection = ""
 	var controller = {
 		"userinput" : false,
 		"numkeys": 2,
+		"numchannels": 1,
 		"applyKeys": function(keys) {
 
 			// standard keypress

@@ -15,9 +15,9 @@ class FC(NNArchitecture.NNArchitecture):
         # create needed variables
         self.weight_vars = {}
         self.bias_vars = {}
-        weight_dim = [self.input_size[0]*self.input_size[1], self.filters]
-        self.weight_vars["W_fc0"] = tf.Variable(tf.truncated_normal(weight_dim,stddev=self.stddev(self.input_size[0]*self.input_size[1])))
-        self.bias_vars["b_fc0"] = tf.Variable(tf.truncated_normal([self.filters], stddev=self.stddev(self.input_size[0]*self.input_size[1])))
+        self.weight_vars["W_fc0"] = tf.Variable(tf.truncated_normal([np.prod(self.input_size), self.filters],
+                    stddev=self.stddev(np.prod(self.input_size))))
+        self.bias_vars["b_fc0"] = tf.Variable(tf.truncated_normal([self.filters], stddev=self.stddev(np.prod(self.input_size))))
         for i in range(1, self.layers):
             self.weight_vars["W_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters,self.filters],stddev=self.stddev(self.filters)))
             self.bias_vars["b_fc"+str(i)] = tf.Variable(tf.truncated_normal([self.filters], stddev=self.stddev(self.filters)))
@@ -27,7 +27,7 @@ class FC(NNArchitecture.NNArchitecture):
     def createCalculation(self, input_data):
 
         #Dimension : 128*128*1
-        x_ = tf.reshape(input_data, [1, self.input_size[0]*self.input_size[1]])
+        x_ = tf.reshape(input_data, [1, np.prod(self.input_size)])
 
         construction = {}
         construction["y_0"] = tf.matmul( x_, self.weight_vars["W_fc0"]) + self.bias_vars["b_fc0"]

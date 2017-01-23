@@ -22,7 +22,7 @@ restore_name = "FC_8_32x32"
 
 # learning scheme: gets pictures from framework, uses network
 # alternatives: PolicyGradient, QLearning,
-lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":25})
+lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":30})
 
 # run
-Framework.Framework.run(frw, lsc, arc, save_after_cycles=100, restore_name=restore_name)
+Framework.Framework.run(frw, lsc, arc, save_after_cycles=1000, restore_name=restore_name)

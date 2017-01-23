@@ -19,7 +19,7 @@ V.createWebSocket = function(controller, url, canvas, width, height) {
 	// finally ready (not before, and can cause error, as canvas is not ready yet)
 	ws.onopen = function() {
 		console.log('BotIO: Connected to Controller-Server.');
-		ws.send(BSON.serialize({"state":"game_start", "width":width, "height":height, "numkeys":controller.numkeys}));
+		ws.send(BSON.serialize({"state":"game_start", "width":width, "height":height, "numkeys":controller.numkeys, "channels": controller.numchannels}));
 	}
 
 	// reconnect (once per second)

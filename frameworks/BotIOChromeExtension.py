@@ -93,10 +93,11 @@ class BotIOChromeExtensionSocket(WebSocket):
                 # init game
                 self.width = self.msg["width"]
                 self.height = self.msg["height"]
+                self.channels = self.msg["channels"]
                 self.numkeys = self.msg["numkeys"]
 
                 # let framework initialize learningscheme and architecture
-                self.framework_wrapper.game_initialized([self.width, self.height], [self.numkeys])
+                self.framework_wrapper.game_initialized([self.channels, self.width, self.height], [self.numkeys])
 
             # ask for next image
             self.framework_wrapper.game_restarted()
@@ -104,6 +105,7 @@ class BotIOChromeExtensionSocket(WebSocket):
         elif self.msg["state"] == "game_running":
 
             # message consists of two parts (game_info + img)
+            # TODO: awaits multiple channels
             if not self.awaits_img:
                 self.awaits_img = True
                 return
@@ -118,6 +120,10 @@ class BotIOChromeExtensionSocket(WebSocket):
             # make grayscale
             img = np.asarray(img)
             img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
+
+            # insert into tensor with different channels
+            # TODO: pack into different channels
+            img = [img]
 
             # skip image
             self.skip_img += 1

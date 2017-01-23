@@ -19,13 +19,13 @@ class PolicyGradient(LearningScheme.LearningScheme):
         # inputs
         self.input_score_gain = tf.placeholder(tf.float32, shape=())
         self.input_window = self.architecture.getInputPlaceholder(timeframe_size)
-        self.input = tf.squeeze(self.architecture.getInputPlaceholder())
+        self.input = tf.squeeze(self.architecture.getInputPlaceholder(), axis=0)
         self.action_prob = self.architecture.createCalculation(self.input)
         self.output_keys = tf.squeeze(self.architecture.getOutputPlaceholder())
 
         # score-function for user-interaction
         self.score_fn_usr = tf.square(self.action_prob - self.output_keys)
-        self.update_usr = self.architecture.optimizer.minimize(self.score_fn_usr)
+        self.update_usr = self.optimizer.minimize(self.score_fn_usr)
 
         # (POLICY GRADIENT) formulate score_fn_pg function
         score_fn_pg = tf.Variable(tf.zeros(kwargs["numkeys"]), name="score_fn_pg")
@@ -33,7 +33,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
             frame_prob = self.architecture.createCalculation(self.input_window[frame,:])
             score_fn_pg += self.input_score_gain*tf.log(frame_prob)
         self.score_fn_pg = score_fn_pg
-        self.update_pg = self.architecture.optimizer.minimize(-self.score_fn_pg)
+        self.update_pg = self.optimizer.minimize(-self.score_fn_pg)
 
         # all variables set!
         super()._init__finished()
@@ -59,7 +59,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
 
         # learn policy gradient
         if self.timeframe_size == self.framecount:
-            self.score_gain = absolute_score - self.lastscore - self.framecount
+            self.score_gain = absolute_score - self.lastscore - self.framecount/10
             self.sess.run(self.update_pg, feed_dict={self.input_window: self.x, self.input_score_gain: self.score_gain})
             print("\n\nLearning (Iteration:", self.learncount, ", ScoreGain:", self.score_gain ,")")
             self.learncount += 1
