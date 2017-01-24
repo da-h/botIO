@@ -1,0 +1,6 @@
+KeyEvent,ArrowRight,1
+KeyEvent,ArrowLeft,1
+KeyEvent,space,1
+KeyEvent,ArrowRight,0
+KeyEvent,ArrowLeft,0
+KeyEvent,space,0
