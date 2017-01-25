@@ -80,8 +80,38 @@ class BotIOChromeExtensionSocket(WebSocket):
 
     def handleMessage(self):
 
+        # first message ever
+        if not self.msg:
+            self.msg = bson.loads(self.data)
+
+        # current status
+        elif self.awaits_img == 0:
+            self.awaits_img += 1
+            self.msg = bson.loads(self.data)
+            return
+
+        # wating for images (message consists of two parts: game_info + multiple images)
+        elif self.awaits_img <= self.numchannels:
+
+            # get data
+            img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
+
+            # make grayscale
+            img = np.asarray(img)
+            img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
+
+            # insert into tensor with different channels
+            self.images[self.awaits_img-1] = img
+
+            # wait for more images?
+            self.awaits_img += 1
+            if self.awaits_img <= self.numchannels:
+                return
+
+        self.awaits_img = 0
+
         # answers
-        if not "state" in self.msg or self.msg["state"] == "game_start":
+        if not self.msg or self.msg["state"] == "game_start":
             print("game (re)started")
             self.msg = bson.loads(self.data)
 
@@ -99,31 +129,13 @@ class BotIOChromeExtensionSocket(WebSocket):
                 self.images = [None]*self.numchannels
 
                 # let framework initialize learningscheme and architecture
-                self.framework_wrapper.game_initialized([self.numchannels, self.width, self.height], [self.numkeys])
+                self.framework_wrapper.game_initialized([self.width, self.height, self.numchannels], [self.numkeys])
 
             # ask for next image
             self.framework_wrapper.game_restarted()
             self.control([])
         elif self.msg["state"] == "game_running":
 
-            # message consists of two parts (game_info + multiple img)
-            if self.awaits_img == 0:
-                self.msg = bson.loads(self.data)
-                return
-            if self.awaits_img < self.numchannels:
-                self.awaits_img += 1
-
-                # get data
-                img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
-
-                # make grayscale
-                img = np.asarray(img)
-                img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
-
-                # insert into tensor with different channels
-                self.images[self.awaits_img-1] = img
-                return
-            self.awaits_img = 0
 
 
             # get data
@@ -138,7 +150,8 @@ class BotIOChromeExtensionSocket(WebSocket):
                 return
 
             # learn ( using the image, the current score and last used keys )
-            keys = self.framework_wrapper.react(used_keys, self.images, score, userinput)
+            img = np.stack(self.images, 2)
+            keys = self.framework_wrapper.react(used_keys, img, score, userinput)
             self.lastkeys = keys
 
             # recalc fps

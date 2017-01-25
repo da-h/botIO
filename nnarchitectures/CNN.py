@@ -10,7 +10,7 @@ class CNN(NNArchitecture.NNArchitecture):
     def __init__(self, filters=20, batch_normalization=True, **kwargs):
         super().__init__(**kwargs)
 
-        if self.input_size[1] != 128 or self.input_size[2] != 128: # fixed 128x128 input size
+        if self.input_size[0] != 128 or self.input_size[1] != 128: # fixed 128x128 input size
             raise ValueError("wrong dimension given for this Network")
 
         self.filters = filters
@@ -20,7 +20,7 @@ class CNN(NNArchitecture.NNArchitecture):
         self.bias_vars = {}
         self.batch_normalization = batch_normalization
 
-        self.channels = self.input_size[0]
+        self.channels = self.input_size[2]
 
         size = 128
         stddev = self.stddev(128**2, 64**2)
