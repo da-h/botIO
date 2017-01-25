@@ -37,9 +37,6 @@ class BotIOChromeExtensionSocket(WebSocket):
     # === #
     # API #
     # === #
-    awaits_img = False
-    msg = {}
-    numkeys = 0
     def control(self, keys):
         self.sendMessage(bson.dumps({"keys": keys}))
 
@@ -59,9 +56,6 @@ class BotIOChromeExtensionSocket(WebSocket):
         self.fps_counter +=1
         self.num_frames +=1
 
-    # image size
-    width = 0
-    height = 0
 
 
     # ======================= #
@@ -72,19 +66,24 @@ class BotIOChromeExtensionSocket(WebSocket):
         self.lastscore = 0
         self.skip_img = -1
         self.skip_lastkeys = []
+        self.awaits_img = 0
+        self.msg = {}
+        self.numkeys = 0
 
+        # image size
+        self.width = 0
+        self.height = 0
 
     # ==================== #
     # Server-Communication #
     # ==================== #
 
     def handleMessage(self):
-        if not self.awaits_img:
-            self.msg = bson.loads(self.data)
 
         # answers
-        if self.msg["state"] == "game_start":
+        if not "state" in self.msg or self.msg["state"] == "game_start":
             print("game (re)started")
+            self.msg = bson.loads(self.data)
 
             # TODO: not good, if error in python occurs
             # (wont re-init a new framework_wrapper)
@@ -93,37 +92,44 @@ class BotIOChromeExtensionSocket(WebSocket):
                 # init game
                 self.width = self.msg["width"]
                 self.height = self.msg["height"]
-                self.channels = self.msg["channels"]
+                self.numchannels = self.msg["numchannels"]
                 self.numkeys = self.msg["numkeys"]
 
+                # create image-tuple
+                self.images = [None]*self.numchannels
+
                 # let framework initialize learningscheme and architecture
-                self.framework_wrapper.game_initialized([self.channels, self.width, self.height], [self.numkeys])
+                self.framework_wrapper.game_initialized([self.numchannels, self.width, self.height], [self.numkeys])
 
             # ask for next image
             self.framework_wrapper.game_restarted()
             self.control([])
         elif self.msg["state"] == "game_running":
 
-            # message consists of two parts (game_info + img)
-            # TODO: awaits multiple channels
-            if not self.awaits_img:
-                self.awaits_img = True
+            # message consists of two parts (game_info + multiple img)
+            if self.awaits_img == 0:
+                self.msg = bson.loads(self.data)
                 return
-            self.awaits_img = False
+            if self.awaits_img < self.numchannels:
+                self.awaits_img += 1
+
+                # get data
+                img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
+
+                # make grayscale
+                img = np.asarray(img)
+                img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
+
+                # insert into tensor with different channels
+                self.images[self.awaits_img-1] = img
+                return
+            self.awaits_img = 0
+
 
             # get data
             score = self.msg["score"]
             used_keys = self.msg["used_keys"]
             userinput = self.msg["userinput"]
-            img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
-
-            # make grayscale
-            img = np.asarray(img)
-            img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
-
-            # insert into tensor with different channels
-            # TODO: pack into different channels
-            img = [img]
 
             # skip image
             self.skip_img += 1
@@ -132,7 +138,7 @@ class BotIOChromeExtensionSocket(WebSocket):
                 return
 
             # learn ( using the image, the current score and last used keys )
-            keys = self.framework_wrapper.react(used_keys, img, score, userinput)
+            keys = self.framework_wrapper.react(used_keys, self.images, score, userinput)
             self.lastkeys = keys
 
             # recalc fps

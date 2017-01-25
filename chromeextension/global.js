@@ -59,20 +59,28 @@ var exportVars = function() {
 // ======== //
 
 // open new window with canvas
-V.createWindow = function(width, height) {
-	var win = window.open("", "Deep Learning Window", "height="+height+",width="+width+",toolbar=0,location=0,menubar=0");
-	win.document.body.innerHTML = `
+V.createWindow = function(width, height, canvas_ids) {
+	var win = window.open("", "Deep Learning Window", "height="+height+",width="+width*canvas_ids.length+",toolbar=0,location=0,menubar=0");
+	innerhtml = `
 		<!DOCTYPE html>
 		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
 			<title>Deep-Learning Control Windew</title>
+			<style>
+				canvas {
+					background: blue;
+				}
+			</style>
 		</head>
-		<body>
-			<canvas width="${width}" height="${height}" style="position:absolute; top:0; left:0"></canvas>
+		<body>`;
+	for(var i in canvas_ids)
+		innerhtml += `<canvas id="${canvas_ids[i]}" width="${width}" height="${height}" style="position:absolute; top:0; left:${i*width}"></canvas>`;
+	innerhtml += `
 		</body>
 		</html>
 	`;
+	win.document.body.innerHTML = innerhtml;
 	return win;
 }
 

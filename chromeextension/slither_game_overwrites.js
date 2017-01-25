@@ -21,16 +21,16 @@ V.resize_ = function(width, height) {//{{{
 	1100 < c && (b = Math.ceil(1100 * b / c), c = 1100);
 	var lgbsc = 560 > hh_ ? Math.max(50, hh_) / 560 : 1;
 	e = Math.round(lgbsc * lgcsc * 1E5) / 1E5;
-	if (mww_ != b || mhh_ != c) mww_ = b, mhh_ = c, mc_.width = mww_, mc_.height = mhh_, mww_p50 = mww_ + 50, mhh_p50 = mhh_ + 50, mww_p150 = mww_ + 150, mhh_p150 = mhh_ + 150, mww_2 = mww_ / 2, mhh_2 =
+	if (mww_ != b || mhh_ != c) mww_ = b, mhh_ = c, mc_[0].width = mww_, mc_[0].height = mhh_, mww_p50 = mww_ + 50, mhh_p50 = mhh_ + 50, mww_p150 = mww_ + 150, mhh_p150 = mhh_ + 150, mww_2 = mww_ / 2, mhh_2 =
 		mhh_ / 2, rdgbg();
 	var csc = Math.min(ww_ / mww_, hh_ / mhh_);
-	trf(mc_, "scale(" + csc + "," + csc + ")");
-	mc_.style.left = Math.floor(ww_ / 2 - mww_ / 2) + "px";
-	mc_.style.top = Math.floor(hh_ / 2 - mhh_ / 2) + "px"
+	trf(mc_[0], "scale(" + csc + "," + csc + ")");
+	mc_[0].style.left = Math.floor(ww_ / 2 - mww_ / 2) + "px";
+	mc_[0].style.top = Math.floor(hh_ / 2 - mhh_ / 2) + "px"
 }//}}}
 
 V.redraw_ = function() {//{{{
-        var b = mc_.getContext("2d");
+        var b = mc_[0].getContext("2d");
         if (animating) {
             if (snake) {
                 var e = .5 + .4 / Math.max(1, (snake.sct + 16) / 36);

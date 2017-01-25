@@ -55,9 +55,12 @@ var slither_injection = ""
 	// ---------------- //
 	// Learning Related
 	// ---------------- //
+	
+	// channels
+	canvas_ids = ["player", "points", "snakes"]
 
 	// create control window for deep learning
-	var win2 = createWindow(window_width,window_height);
+	var win2 = createWindow(window_width,window_height,canvas_ids);
 
 	// controls
 	//		(0) left arrow  = kd_l=1  : left turn
@@ -66,7 +69,7 @@ var slither_injection = ""
 	var controller = {
 		"userinput" : false,
 		"numkeys": 2,
-		"numchannels": 1,
+		"numchannels": 3,
 		"applyKeys": function(keys) {
 
 			// standard keypress
@@ -152,7 +155,9 @@ var slither_injection = ""
 		// get canvas of new window if not found yet
 		if(!mc_) if(!win2.document) return;
 					else {
-						mc_ = win2.document.getElementsByTagName("canvas")[0]
+						mc_ = [];
+						for(var i in canvas_ids)
+							mc_.push(win2.document.getElementById(canvas_ids[i]))
 
 						// init vars
 						resize_(window_width, window_height);
