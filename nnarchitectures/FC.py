@@ -39,8 +39,3 @@ class FC(NNArchitecture.NNArchitecture):
 
         # return construction["y_"+str(self.layers)]
         return tf.sigmoid(construction["y_"+str(self.layers)])
-
-    def stddev(self, input_size, output_size):
-        # return math.sqrt(2*1.3/(input_size+output_size))
-        return math.sqrt(100/(input_size))
-        # return 4*math.sqrt(6/(input_size+output_size))

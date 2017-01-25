@@ -1,10 +1,12 @@
 import tensorflow as tf
+import math
 
 class NNArchitecture(object):
 
     def __init__(self, input_size, output_size):
         self.input_size = input_size
         self.output_size = output_size
+        self.train_phase = tf.placeholder(tf.bool, name='phase_train')
 
     def getInputPlaceholder(self, num=1):
         return tf.placeholder(tf.float32, shape=[num] + self.input_size)
@@ -15,11 +17,16 @@ class NNArchitecture(object):
     def createCalculation(self, input_data):
         raise Exception("Should be overwritten")
 
+    def stddev(self, input_size, output_size):
+        # return math.sqrt(4*1.3/(input_size+output_size))
+        return math.sqrt(70/(input_size))
+        # return 4*math.sqrt(6/(input_size+output_size))
+
 class NNMerge(NNArchitecture):
-    def __init__(self, input_size, output_size, settings, mid_sizes):
-        self.input_size = input_size
-        self.output_size = output_size
-        self.mid_sizes = [input_size] + mid_sizes + [output_size]
+    def __init__(self, settings, mid_sizes, **kwargs):
+        super().__init__(**kwargs)
+
+        self.mid_sizes = [self.input_size] + mid_sizes + [self.output_size]
         self.archs = []
 
         # build architecture

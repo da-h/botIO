@@ -47,7 +47,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
 
         # learn user commands
         if userinput:
-            self.sess.run(self.update_usr, feed_dict={self.input: image, self.output_keys: used_keys})
+            self.sess.run(self.update_usr, feed_dict={self.input: image, self.output_keys: used_keys, self.architecture.train_phase:True})
             self._reset_pg()
             self.save()
             return used_keys # in case user is not giving input by the time of sending this message
@@ -55,12 +55,12 @@ class PolicyGradient(LearningScheme.LearningScheme):
         self.framecount += 1
 
         self.x.append(image)
-        current_command = self.sess.run(self.action_prob, feed_dict={self.input: image}).reshape([-1])
+        current_command = self.sess.run(self.action_prob, feed_dict={self.input: image, self.architecture.train_phase:True}).reshape([-1])
 
         # learn policy gradient
         if self.timeframe_size == self.framecount:
-            self.score_gain = absolute_score - self.lastscore - self.framecount/10
-            self.sess.run(self.update_pg, feed_dict={self.input_window: self.x, self.input_score_gain: self.score_gain})
+            self.score_gain = absolute_score - self.lastscore - self.framecount/2
+            self.sess.run(self.update_pg, feed_dict={self.input_window: self.x, self.input_score_gain: self.score_gain, self.architecture.train_phase:True})
             print("\n\nLearning (Iteration:", self.learncount, ", ScoreGain:", self.score_gain ,")")
             self.learncount += 1
             self._reset_pg()
