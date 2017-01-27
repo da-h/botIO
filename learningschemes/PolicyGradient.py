@@ -59,7 +59,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
 
         # learn policy gradient
         if self.timeframe_size == self.framecount:
-            self.score_gain = absolute_score - self.lastscore - self.framecount/2
+            self.score_gain = absolute_score - self.lastscore - self.framecount/10
             self.sess.run(self.update_pg, feed_dict={self.input_window: self.x, self.input_score_gain: self.score_gain, self.architecture.train_phase:True})
             print("\n\nLearning (Iteration:", self.learncount, ", ScoreGain:", self.score_gain ,")")
             self.learncount += 1

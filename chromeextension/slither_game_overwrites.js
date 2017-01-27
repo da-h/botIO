@@ -1,6 +1,6 @@
 
 // init of new canvas
-V.resize_ = function(width, height) {//{{{
+V.resize_ = function(width, height, mc_) {//{{{
 	mww_ = 200,
     mhh_ = 200,
     mww_p50 = mww + 50,
@@ -21,16 +21,22 @@ V.resize_ = function(width, height) {//{{{
 	1100 < c && (b = Math.ceil(1100 * b / c), c = 1100);
 	var lgbsc = 560 > hh_ ? Math.max(50, hh_) / 560 : 1;
 	e = Math.round(lgbsc * lgcsc * 1E5) / 1E5;
-	if (mww_ != b || mhh_ != c) mww_ = b, mhh_ = c, mc_[0].width = mww_, mc_[0].height = mhh_, mww_p50 = mww_ + 50, mhh_p50 = mhh_ + 50, mww_p150 = mww_ + 150, mhh_p150 = mhh_ + 150, mww_2 = mww_ / 2, mhh_2 =
+	if (mww_ != b || mhh_ != c) mww_ = b, mhh_ = c, mc_.width = mww_, mc_.height = mhh_, mww_p50 = mww_ + 50, mhh_p50 = mhh_ + 50, mww_p150 = mww_ + 150, mhh_p150 = mhh_ + 150, mww_2 = mww_ / 2, mhh_2 =
 		mhh_ / 2, rdgbg();
 	var csc = Math.min(ww_ / mww_, hh_ / mhh_);
-	trf(mc_[0], "scale(" + csc + "," + csc + ")");
-	mc_[0].style.left = Math.floor(ww_ / 2 - mww_ / 2) + "px";
-	mc_[0].style.top = Math.floor(hh_ / 2 - mhh_ / 2) + "px"
+	trf(mc_, "scale(" + csc + "," + csc + ")");
+	mc_.style.left = Math.floor(ww_ / 2 - mww_ / 2) + "px";
+	mc_.style.top = Math.floor(hh_ / 2 - mhh_ / 2) + "px"
 }//}}}
 
-V.redraw_ = function() {//{{{
-        var b = mc_[0].getContext("2d");
+V.redraw_ = function(mc_player, mc_points, mc_snakes) {//{{{
+			// >>>>>>>>>>>>>
+			// change canvas
+			// <<<<<<<<<<<<<
+var canvases = [mc_player.getContext("2d"), mc_points.getContext("2d"), mc_snakes.getContext("2d")];
+for ( var canvases_i in canvases) {
+	var b = canvases[canvases_i];
+
         if (animating) {
             if (snake) {
                 var e = .5 + .4 / Math.max(1, (snake.sct + 16) / 36);
@@ -71,6 +77,7 @@ V.redraw_ = function() {//{{{
 			// background end//}}}
 			// <<<<<<<<<<<<<<
 
+			if(canvases_i==1) {
             if (testing)
                 for (e = sectors.length - 1; 0 <= e; e--) c = sectors[e], b.fillStyle = "rgba(0, 255, 0, .1)", b.fillRect(mww_2 + (c.xx * sector_size - view_xx) * gsc, mhh_2 + (c.yy * sector_size - view_yy) * gsc, sector_size * gsc - 4, sector_size * gsc - 4);
             b.save();
@@ -94,6 +101,7 @@ V.redraw_ = function() {//{{{
                     1 == f.rad ? (A = px - f.fw2, D = py - f.fh2, b.globalAlpha = .75 * f.fr, b.drawImage(f.fi, A, D), b.globalAlpha = .75 * (.5 + .5 * Math.cos(f.gfr / 13)) * f.fr, b.drawImage(f.fi, A, D)) : (A = px - f.fw2 * f.rad, D = py - f.fh2 * f.rad, b.globalAlpha = .75 * f.fr, b.drawImage(f.fi, 0, 0, f.fw, f.fh, A, D, f.fw * f.rad, f.fh * f.rad), b.globalAlpha = .75 * (.5 + .5 * Math.cos(f.gfr / 13)) * f.fr, b.drawImage(f.fi, 0, 0, f.fw, f.fh, A, D, f.fw * f.rad, f.fh * f.rad))
                 }
             b.restore();
+			}
             b.save();
             b.strokeStyle = "#90C098";
 
@@ -106,15 +114,27 @@ V.redraw_ = function() {//{{{
 			// <<<<<<<<< 
 			// worm name //}}}
 			// <<<<<<<<< 
-			
+
             for (e = snakes.length - 1; 0 <= e; e--)
                 for (c = snakes[e], c.iiv = !1, t = c.pts.length - 1; 0 <= t; t--)
                     if (z = c.pts[t], px = z.xx + z.fx, py = z.yy + z.fy, px >= bpx1 && py >= bpy1 && px <= bpx2 && py <= bpy2) {
                         c.iiv = !0;
                         break
                     }
+
             for (e = snakes.length - 1; 0 <= e; e--)
                 if (c = snakes[e], c.iiv) {
+
+					// >>>>>>>>>>>>>>>>>>>>
+					// draw canvas specific
+					if(c != snake && canvases_i==0)
+						continue;
+					if(canvases_i==1)
+						continue
+					if(c == snake && canvases_i==2)
+						continue;
+					// <<<<<<<<<<<<<<<<<<<<
+
                     f = c.xx + c.fx;
                     w = c.yy + c.fy;
                     px = f;
@@ -432,7 +452,9 @@ V.redraw_ = function() {//{{{
             wumsts && 0 < rank && 0 < snake_count && playing && (wumsts = !1, c = "Your length", e = "of", J = "Your rank", "de" == lang ? (c = "Deine L\u00e4nge", e = "von", J = "Dein rang") : "fr" == lang ? (c = "Votre longueur", e = "de", J = "Ton rang") : "pt" == lang && (c = "Seu comprimento", e = "do", J = "Seu classifica\u00e7\u00e3o"), c = "" + ('<span style="font-size: 14px;"><span style="opacity: .4;">' + c + ': </span><span style="opacity: .8; font-weight: bold;">' +
                 Math.floor(15 * (fpsls[snake.sct] + snake.fam / fmlts[snake.sct] - 1) - 5) / 1 + "</span></span>"), c += '<BR><span style="opacity: .3;">' + J + ': </span><span style="opacity: .35;">' + rank + '</span><span style="opacity: .3;"> ' + e + ' </span><span style="opacity: .35;">' + snake_count + "</span>", lbf.innerHTML = c);
             b.restore()
+
         }
+}
     };//}}}
 
 V.gen_colors_ = function() { // {{{

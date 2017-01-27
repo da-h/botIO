@@ -24,6 +24,7 @@ V.createWebSocket = function(controller, url, channels, width, height) {
 		var byteArray = new Uint8Array(pixellen);
 		for(var i=0; i<pixellen; i++)
 			byteArray[i] = pixelArray[i];
+		return byteArray;
 	}
 
 	// finally ready (not before, and can cause error, as canvas is not ready yet)
@@ -65,7 +66,7 @@ V.createWebSocket = function(controller, url, channels, width, height) {
 		var current_score = controller.getScore();
 
 		// send image (on request)
-		imgs = [];
+		var imgs = [];
 		for(var i in channels)
 			imgs.push(get_img(channels[i]));
 

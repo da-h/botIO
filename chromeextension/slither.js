@@ -156,11 +156,16 @@ var slither_injection = ""
 		if(!mc_) if(!win2.document) return;
 					else {
 						mc_ = [];
-						for(var i in canvas_ids)
+						for(var i in canvas_ids) {
 							mc_.push(win2.document.getElementById(canvas_ids[i]))
 
-						// init vars
-						resize_(window_width, window_height);
+							// init vars
+							resize_(window_width, window_height, mc_[i]);
+
+							// readjust position
+							mc_[i].style.left = parseInt(mc_[i].style.left.slice(0,-2)) + window_width*i + "px";
+						}
+
 
 						// init websocket (learning_window/canvas <-> server <-> controller)
 						createWebSocket( controller, websocket_url, mc_, window_width, window_height );
@@ -168,7 +173,7 @@ var slither_injection = ""
 
 		// draw also on new canvas
 		else
-			redraw_();
+			redraw_(mc_[0],mc_[1],mc_[2]);
 	}
 
 	

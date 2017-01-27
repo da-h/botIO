@@ -67,11 +67,6 @@ V.createWindow = function(width, height, canvas_ids) {
 		<head>
 			<meta charset="UTF-8">
 			<title>Deep-Learning Control Windew</title>
-			<style>
-				canvas {
-					background: blue;
-				}
-			</style>
 		</head>
 		<body>`;
 	for(var i in canvas_ids)

@@ -19,7 +19,7 @@ class NNArchitecture(object):
 
     def stddev(self, input_size, output_size):
         # return math.sqrt(4*1.3/(input_size+output_size))
-        return math.sqrt(70/(input_size))
+        return math.sqrt(150/(input_size))
         # return 4*math.sqrt(6/(input_size+output_size))
 
 class NNMerge(NNArchitecture):
