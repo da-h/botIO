@@ -25,7 +25,9 @@ class PolicyGradient(LearningScheme.LearningScheme):
 
         # score-function for user-interaction
         self.score_fn_usr = tf.square(self.action_prob - self.output_keys)
-        self.update_usr = self.optimizer.minimize(self.score_fn_usr)
+        action_prob_tern = action_prob_tern(self.action_prob)
+        if (not (action_prob_tern == self.output_keys).all()):
+            self.update_usr = self.architecture.optimizer.minimize(self.score_fn_usr)
 
         # (POLICY GRADIENT) formulate score_fn_pg function
         score_fn_pg = tf.Variable(tf.zeros(kwargs["numkeys"]), name="score_fn_pg")
@@ -38,6 +40,16 @@ class PolicyGradient(LearningScheme.LearningScheme):
         # all variables set!
         super()._init__finished()
         self.sess.run(tf.global_variables_initializer())
+
+    def action_prob_tern(self, action_prob):
+        action_prob_tern = [0, 0]
+        if (action_prob[0] > 1 / 3):
+            action_prob_tern[0] = 1 / 2
+        if (action_prob[0] > 2 / 3):
+            action_prob_tern[0] = 1
+        if (action_prob[1] > 1 / 2):
+            action_prob_tern[1] = 1
+        return action_prob_tern
 
     def _reset_pg(self):
         self.x = []
