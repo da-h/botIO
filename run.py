@@ -17,8 +17,8 @@ frw = (BotIOChromeExtension,{'host':'','port':9999, 'skipframes': 3})
 # stddev-function
 def stddev(fan_in, fan_out):
     # return math.sqrt(4*1.3/(fan_in+fan_out))
-    return math.sqrt(150/(fan_in))
-    # return 4*math.sqrt(6/(fan_in+fan_out))
+    # return math.sqrt(150/(fan_in))
+    return 4*math.sqrt(6/(fan_in+fan_out))
 
 # architecture of neural network
 # alternatives: CNN, RNN, FC, [LSTM, FractalNet, HighwayNets, uNet, ...]
@@ -31,8 +31,8 @@ restore_name = "CNN_20__FC_2x300"
 
 # learning scheme: gets pictures from framework, uses network
 # alternatives: PolicyGradient, QLearning,
-lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":40, "optimizer":tf.train.AdamOptimizer(0.00001), "penalty_per_frame": 1/10})
+lsc = (PolicyGradient,{"window_inc":0, "timeframe_size":40, "optimizer":tf.train.AdamOptimizer(0.00001), "penalty_per_frame": 1/4})
 
 
 # run
-Framework.Framework.run(frw, lsc, arc, save_after_cycles=500, restore_name=restore_name)
+Framework.Framework.run(frw, lsc, arc, save_after_cycles=100, restore_name=restore_name)

@@ -60,7 +60,7 @@ V.createWebSocket = function(controller, url, channels, width, height) {
 			
 
 		// apply control for last image
-		used_key = controller.applyKeys(msg.keys)
+		used_key = controller.applyKeys(msg.key)
 		
 		// receive current score
 		var current_score = controller.getScore();

@@ -36,7 +36,7 @@ class LearningScheme(object):
             print("Done.\n");
 
         # save summary-graph
-        writer = tf.train.SummaryWriter(self.restore_path+"_summary", self.sess.graph)
+        # writer = tf.summary.FileWriter(self.restore_path+"_summary", self.sess.graph)
 
     def constructNN(self, architecture_tuple):
         # build architecture

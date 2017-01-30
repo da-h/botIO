@@ -70,17 +70,18 @@ var slither_injection = ""
 		"userinput" : false,
 		"numkeys": 6,
 		"numchannels": 3,
-		"applyKeys": function(keys) {
+		"applyKeys": function(key) {
+			console.log(key);
 
 			// standard keypress
-			if(keys.length != controller.numkeys)
+			if(key < 0)
 				return 0;
 
 			// no userinput
 			if(!controller.userinput) {
 
 				// nothing
-				switch(keys) {
+				switch(key) {
 					case 1:
 						kd_l = 1;
 						kd_r = 0;

@@ -31,6 +31,9 @@ class BotIOChromeExtension(Framework.Framework, SimpleWebSocketServer):
         super(BotIOChromeExtension, self).serveforever()
 
 
+class prettyfloat(float):
+    def __repr__(self):
+        return "%0.2f" % self
 
 class BotIOChromeExtensionSocket(WebSocket):
 
@@ -38,8 +41,8 @@ class BotIOChromeExtensionSocket(WebSocket):
     # === #
     # API #
     # === #
-    def control(self, keys):
-        self.sendMessage(bson.dumps({"keys": keys}))
+    def control(self, key):
+        self.sendMessage(bson.dumps({"key": key}))
 
     # fps
     # TODO: make class, calc real and seen fps
@@ -78,6 +81,9 @@ class BotIOChromeExtensionSocket(WebSocket):
     # ==================== #
     # Server-Communication #
     # ==================== #
+
+    def _fArray2str(self, A):
+        return ", ".join(["%0.2f" % i for i in A])
 
     def handleMessage(self):
         try:
@@ -135,7 +141,7 @@ class BotIOChromeExtensionSocket(WebSocket):
 
                 # ask for next image
                 self.framework_wrapper.game_restarted()
-                self.control([])
+                self.control(-1)
             elif self.msg["state"] == "game_running":
 
 
@@ -153,15 +159,15 @@ class BotIOChromeExtensionSocket(WebSocket):
                 # learn ( using the image, the current score and last used keys )
                 img = np.stack(self.images, 2)
                 keys = self.framework_wrapper.react(used_key, img, score, userinput)
-                self.lastkeys = keys
 
                 # recalc fps
                 self.updateFPS()
-                print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Seen_Frames:",self.num_frames, " Predicted_keys:",keys, " user:", userinput, end="")
+                print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Seen_Frames:",self.num_frames, " Predicted_keys:",self._fArray2str(keys), " user:", userinput, end="")
                 self.lastscore = score
 
                 # use next keys
-                self.control(keys)
+                self.lastkeys = np.asscalar(np.argmax(keys,axis=0))
+                self.control(self.lastkeys)
 
             elif self.msg["state"] == "game_ended":
 

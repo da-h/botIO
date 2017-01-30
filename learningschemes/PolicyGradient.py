@@ -21,7 +21,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
         self.input_score_gain = tf.placeholder(tf.float32, shape=())
         self.input_window = self.architecture.getInputPlaceholder(timeframe_size)
         self.input = tf.squeeze(self.architecture.getInputPlaceholder(), axis=0)
-        self.action_prob = self.architecture.createCalculation(self.input)
+        self.action_prob = tf.squeeze(self.architecture.createCalculation(self.input))
         self.output_keys = tf.squeeze(self.architecture.getOutputPlaceholder())
 
         # score-function for user-interaction
@@ -32,11 +32,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
         score_fn_pg = tf.Variable(tf.zeros(kwargs["numkeys"]), name="score_fn_pg")
         for frame in range(timeframe_size):
             frame_prob = self.architecture.createCalculation(self.input_window[frame,:])
-
-            # project into slither-command-space
-            # frame_prob = tf.pack([ tf.reduce_max( [frame_prob[0],  )
-
-            score_fn_pg += self.input_score_gain*tf.log(frame_prob)
+            score_fn_pg += self.input_score_gain*tf.log(tf.reduce_max(frame_prob))
         self.score_fn_pg = score_fn_pg
         self.update_pg = self.optimizer.minimize(-self.score_fn_pg)
 
@@ -60,7 +56,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
         self.framecount += 1
 
         self.x.append(image)
-        current_command = self.sess.run(self.action_prob, feed_dict={self.input: image, self.architecture.train_phase:True}).reshape([-1])
+        current_commands = self.sess.run(self.action_prob, feed_dict={self.input: image, self.architecture.train_phase:True}).reshape([-1])
 
         # learn policy gradient
         if self.timeframe_size == self.framecount:
@@ -72,7 +68,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
             self.lastscore = absolute_score
             self.save()
 
-        return current_command.tolist()
+        return current_commands.tolist()
 
     def game_restarted(self):
         self.x = []
