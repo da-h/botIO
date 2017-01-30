@@ -5,6 +5,7 @@ from PIL import Image
 from . import Framework
 import sys
 import numpy as np
+import traceback
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -79,93 +80,104 @@ class BotIOChromeExtensionSocket(WebSocket):
     # ==================== #
 
     def handleMessage(self):
+        try:
 
-        # first message ever
-        if not self.msg:
-            self.msg = bson.loads(self.data)
+            raise ValueError("Blub")
 
-        # current status
-        elif self.awaits_img == 0:
-            self.awaits_img += 1
-            self.msg = bson.loads(self.data)
-            return
+            # first message ever
+            if not self.msg:
+                self.msg = bson.loads(self.data)
 
-        # wating for images (message consists of two parts: game_info + multiple images)
-        elif self.awaits_img <= self.numchannels:
-
-            # get data
-            img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
-
-            # make grayscale
-            img = np.asarray(img)
-            img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
-
-            # insert into tensor with different channels
-            self.images[self.awaits_img-1] = img
-
-            # wait for more images?
-            self.awaits_img += 1
-            if self.awaits_img <= self.numchannels:
+            # current status
+            elif self.awaits_img == 0:
+                self.awaits_img += 1
+                self.msg = bson.loads(self.data)
                 return
 
-        self.awaits_img = 0
+            # wating for images (message consists of two parts: game_info + multiple images)
+            elif self.awaits_img <= self.numchannels:
 
-        # answers
-        if not self.msg or self.msg["state"] == "game_start":
-            print("game (re)started")
-            self.msg = bson.loads(self.data)
+                # get data
+                img = Image.frombuffer( "RGBA", (self.width, self.height), self.data, "raw", "RGBA", 0, 1)
 
-            # TODO: not good, if error in python occurs
-            # (wont re-init a new framework_wrapper)
-            if not self.framework_wrapper.game_running:
+                # make grayscale
+                img = np.asarray(img)
+                img = np.dot(img[...,:3], [0.299, 0.587, 0.114])/255
 
-                # init game
-                self.width = self.msg["width"]
-                self.height = self.msg["height"]
-                self.numchannels = self.msg["numchannels"]
-                self.numkeys = self.msg["numkeys"]
+                # insert into tensor with different channels
+                self.images[self.awaits_img-1] = img
 
-                # create image-tuple
-                self.images = [None]*self.numchannels
+                # wait for more images?
+                self.awaits_img += 1
+                if self.awaits_img <= self.numchannels:
+                    return
 
-                # let framework initialize learningscheme and architecture
-                self.framework_wrapper.game_initialized([self.width, self.height, self.numchannels], [self.numkeys])
+            self.awaits_img = 0
 
-            # ask for next image
-            self.framework_wrapper.game_restarted()
-            self.control([])
-        elif self.msg["state"] == "game_running":
+            # answers
+            if not self.msg or self.msg["state"] == "game_start":
+                print("game (re)started")
+                self.msg = bson.loads(self.data)
+
+                # TODO: not good, if error in python occurs
+                # (wont re-init a new framework_wrapper)
+                if not self.framework_wrapper.game_running:
+
+                    # init game
+                    self.width = self.msg["width"]
+                    self.height = self.msg["height"]
+                    self.numchannels = self.msg["numchannels"]
+                    self.numkeys = self.msg["numkeys"]
+
+                    # create image-tuple
+                    self.images = [None]*self.numchannels
+
+                    # let framework initialize learningscheme and architecture
+                    self.framework_wrapper.game_initialized([self.width, self.height, self.numchannels], [self.numkeys])
+
+                # ask for next image
+                self.framework_wrapper.game_restarted()
+                self.control([])
+            elif self.msg["state"] == "game_running":
 
 
 
-            # get data
-            score = self.msg["score"]
-            used_keys = self.msg["used_keys"]
-            userinput = self.msg["userinput"]
+                # get data
+                score = self.msg["score"]
+                used_keys = self.msg["used_keys"]
+                userinput = self.msg["userinput"]
 
-            # skip image
-            self.skip_img += 1
-            if not userinput and self.framework_wrapper.skipframes > 1 and self.skip_img % self.framework_wrapper.skipframes != 0:
-                self.control(self.lastkeys)
-                return
+                # skip image
+                self.skip_img += 1
+                if not userinput and self.framework_wrapper.skipframes > 1 and self.skip_img % self.framework_wrapper.skipframes != 0:
+                    self.control(self.lastkeys)
+                    return
 
-            # learn ( using the image, the current score and last used keys )
-            img = np.stack(self.images, 2)
-            keys = self.framework_wrapper.react(used_keys, img, score, userinput)
-            self.lastkeys = keys
+                # learn ( using the image, the current score and last used keys )
+                img = np.stack(self.images, 2)
+                keys = self.framework_wrapper.react(used_keys, img, score, userinput)
+                self.lastkeys = keys
 
-            # recalc fps
-            self.updateFPS()
-            print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Seen_Frames:",self.num_frames, " Predicted_keys:",keys, " user:", userinput, end="")
-            self.lastscore = score
+                # recalc fps
+                self.updateFPS()
+                print("\rFPS:",self.fps, " Score_Gain:",score-self.lastscore, " Seen_Frames:",self.num_frames, " Predicted_keys:",keys, " user:", userinput, end="")
+                self.lastscore = score
 
-            # use next keys
-            self.control(keys)
+                # use next keys
+                self.control(keys)
 
-        elif self.msg["state"] == "game_ended":
+            elif self.msg["state"] == "game_ended":
 
-            # score = msg["score"]
-            print("game ended")
+                # score = msg["score"]
+                print("game ended")
+
+
+        # connection closes due to exception
+        except:
+            print(traceback.format_exc())
+
+            # no auto reconnect
+            sys.exit(0)
 
     def handleConnected(self):
         print('Connection established to ', self.address)
