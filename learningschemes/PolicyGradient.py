@@ -34,7 +34,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
             frame_prob = self.architecture.createCalculation(self.input_window[frame,:])
 
             # project into slither-command-space
-            frame_prob = tf.pack([ tf.reduce_max( [frame_prob[0],  )
+            # frame_prob = tf.pack([ tf.reduce_max( [frame_prob[0],  )
 
             score_fn_pg += self.input_score_gain*tf.log(frame_prob)
         self.score_fn_pg = score_fn_pg
