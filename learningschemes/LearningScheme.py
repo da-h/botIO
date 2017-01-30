@@ -35,6 +35,9 @@ class LearningScheme(object):
             self.saver.restore(self.sess, ckpt.model_checkpoint_path)
             print("Done.\n");
 
+        # save summary-graph
+        writer = tf.train.SummaryWriter(self.restore_path+"_summary", self.sess.graph)
+
     def constructNN(self, architecture_tuple):
         # build architecture
         architecture_tuple[1]["input_size"] = self.image_dim
