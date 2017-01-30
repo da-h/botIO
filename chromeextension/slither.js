@@ -68,34 +68,71 @@ var slither_injection = ""
 	//		(2) space 		= setAcceleration(1)  : speedup
 	var controller = {
 		"userinput" : false,
-		"numkeys": 2,
+		"numkeys": 6,
 		"numchannels": 3,
 		"applyKeys": function(keys) {
 
 			// standard keypress
 			if(keys.length != controller.numkeys)
-				return [0.5, 0];
+				return 0;
 
 			// no userinput
 			if(!controller.userinput) {
-			
-				// left/right turn
-				kd_l = keys[0] < 1/3 ? 1 : 0;
-				kd_r = keys[0] >= 2/3 ? 1 : 0;
 
+				// nothing
+				switch(keys) {
+					case 1:
+						kd_l = 1;
+						kd_r = 0;
+						kd_u = 0;
+						break;
+					case 2:
+						kd_l = 0;
+						kd_r = 1;
+						kd_u = 0;
+						break;
+					case 3:
+						kd_l = 0;
+						kd_r = 0;
+						kd_u = 1;
+						break;
+					case 4:
+						kd_l = 1;
+						kd_r = 0;
+						kd_u = 1;
+						break;
+					case 5:
+						kd_l = 0;
+						kd_r = 1;
+						kd_u = 1;
+						break;
+					//case 0:
+					default:
+						kd_l = 0;
+						kd_r = 0;
+						kd_u = 0;
+
+				}
+			
 				// speedup
-				setAcceleration( keys[1] >= 0.5 ? 1 : 0 );
-				kd_u = keys[1] >= 0.5 ? 1 : 0;
+				setAcceleration( kd_u );
 
 			}
 
 			// return real pressed key-array:
-			// 	left/right turn
-				keys[0] = kd_l==1 ? 0 : kd_r==1 ? 1 : 0.5;
-			// 	speedup
-				keys[1] = kd_u==1 ? 1 : 0;
-
-			return keys;
+			if(kd_l==0 && kd_r==0 && kd_u==0) {
+				return 0;
+			} else if(kd_l==1 && kd_r==0 && kd_u==0) {
+				return 1;
+			} else if(kd_l==0 && kd_r==1 && kd_u==0) {
+				return 2;
+			} else if(kd_l==0 && kd_r==0 && kd_u==1) {
+				return 3;
+			} else if(kd_l==1 && kd_r==0 && kd_u==1) {
+				return 4;
+			} else if(kd_l==0 && kd_r==1 && kd_u==1) {
+				return 5;
+			}
 		},
 		"getScore" : function() {
 			if(snake == null)

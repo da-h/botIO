@@ -141,7 +141,7 @@ class BotIOChromeExtensionSocket(WebSocket):
 
                 # get data
                 score = self.msg["score"]
-                used_keys = self.msg["used_keys"]
+                used_key = self.msg["used_key"]
                 userinput = self.msg["userinput"]
 
                 # skip image
@@ -152,7 +152,7 @@ class BotIOChromeExtensionSocket(WebSocket):
 
                 # learn ( using the image, the current score and last used keys )
                 img = np.stack(self.images, 2)
-                keys = self.framework_wrapper.react(used_keys, img, score, userinput)
+                keys = self.framework_wrapper.react(used_key, img, score, userinput)
                 self.lastkeys = keys
 
                 # recalc fps

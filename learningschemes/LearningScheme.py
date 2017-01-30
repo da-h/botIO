@@ -54,4 +54,5 @@ class LearningScheme(object):
         self.save_counter += 1
         if self.save_counter % self.save_after_cycles == 0:
             self.save_checkpoints += 1
+            print("Saving...");
             self.saver.save(self.sess, self.restore_path, global_step=self.save_checkpoints)

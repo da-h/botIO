@@ -32,6 +32,10 @@ class PolicyGradient(LearningScheme.LearningScheme):
         score_fn_pg = tf.Variable(tf.zeros(kwargs["numkeys"]), name="score_fn_pg")
         for frame in range(timeframe_size):
             frame_prob = self.architecture.createCalculation(self.input_window[frame,:])
+
+            # project into slither-command-space
+            frame_prob = tf.pack([ tf.reduce_max( [frame_prob[0],  )
+
             score_fn_pg += self.input_score_gain*tf.log(frame_prob)
         self.score_fn_pg = score_fn_pg
         self.update_pg = self.optimizer.minimize(-self.score_fn_pg)
@@ -44,14 +48,14 @@ class PolicyGradient(LearningScheme.LearningScheme):
         self.x = []
         self.framecount = 0
 
-    def react(self, used_keys, image, absolute_score, userinput=False, extra_info=None):
+    def react(self, used_key, image, absolute_score, userinput=False, extra_info=None):
 
         # learn user commands
         if userinput:
-            self.sess.run(self.update_usr, feed_dict={self.input: image, self.output_keys: used_keys, self.architecture.train_phase:True})
+            self.sess.run(self.update_usr, feed_dict={self.input: image, self.output_keys: used_key, self.architecture.train_phase:True})
             self._reset_pg()
             self.save()
-            return used_keys # in case user is not giving input by the time of sending this message
+            return used_key # in case user is not giving input by the time of sending this message
 
         self.framecount += 1
 
