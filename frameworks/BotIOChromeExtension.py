@@ -82,8 +82,6 @@ class BotIOChromeExtensionSocket(WebSocket):
     def handleMessage(self):
         try:
 
-            raise ValueError("Blub")
-
             # first message ever
             if not self.msg:
                 self.msg = bson.loads(self.data)
@@ -139,7 +137,6 @@ class BotIOChromeExtensionSocket(WebSocket):
                 self.framework_wrapper.game_restarted()
                 self.control([])
             elif self.msg["state"] == "game_running":
-
 
 
                 # get data

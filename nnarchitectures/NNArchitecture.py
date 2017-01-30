@@ -3,10 +3,12 @@ import math
 
 class NNArchitecture(object):
 
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, stddev=None):
         self.input_size = input_size
         self.output_size = output_size
         self.train_phase = tf.placeholder(tf.bool, name='phase_train')
+        if stddev is not None:
+            self.stddev = stddev
 
     def getInputPlaceholder(self, num=1):
         return tf.placeholder(tf.float32, shape=[num] + self.input_size)
@@ -18,9 +20,7 @@ class NNArchitecture(object):
         raise Exception("Should be overwritten")
 
     def stddev(self, input_size, output_size):
-        # return math.sqrt(4*1.3/(input_size+output_size))
-        return math.sqrt(150/(input_size))
-        # return 4*math.sqrt(6/(input_size+output_size))
+        return math.sqrt(4*1.3/(input_size+output_size))
 
 class NNMerge(NNArchitecture):
     def __init__(self, settings, mid_sizes, **kwargs):
@@ -33,6 +33,8 @@ class NNMerge(NNArchitecture):
         for i, (arc_class, arc_param) in enumerate(settings):
             arc_param["input_size"] = self.mid_sizes[i]
             arc_param["output_size"] = self.mid_sizes[i+1]
+            if not "stddev" in arc_param:
+                arc_param["stddev"] = self.stddev
             self.archs.append( arc_class(**arc_param) )
 
 

@@ -4,7 +4,7 @@ import numpy as np
 
 class PolicyGradient(LearningScheme.LearningScheme):
 
-    def __init__(self, window_inc=0, timeframe_size=100, **kwargs):
+    def __init__(self, window_inc=0, timeframe_size=100, penalty_per_frame=1/10, **kwargs):
         super().__init__(**kwargs)
 
         # timeframe related
@@ -15,6 +15,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
         self.score_gain = 0
         self.lastscore = 0
         self.lastcommand = [0.5,0.5,0.5]
+        self.penalty_per_frame = penalty_per_frame
 
         # inputs
         self.input_score_gain = tf.placeholder(tf.float32, shape=())
@@ -43,7 +44,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
         self.x = []
         self.framecount = 0
 
-    def react(self, used_keys, image, absolute_score, userinput=False):
+    def react(self, used_keys, image, absolute_score, userinput=False, extra_info=None):
 
         # learn user commands
         if userinput:
@@ -59,7 +60,7 @@ class PolicyGradient(LearningScheme.LearningScheme):
 
         # learn policy gradient
         if self.timeframe_size == self.framecount:
-            self.score_gain = absolute_score - self.lastscore - self.framecount/10
+            self.score_gain = absolute_score - self.lastscore - self.framecount*self.penalty_per_frame
             self.sess.run(self.update_pg, feed_dict={self.input_window: self.x, self.input_score_gain: self.score_gain, self.architecture.train_phase:True})
             print("\n\nLearning (Iteration:", self.learncount, ", ScoreGain:", self.score_gain ,")")
             self.learncount += 1
